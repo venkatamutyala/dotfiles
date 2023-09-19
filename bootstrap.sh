@@ -3,7 +3,7 @@
 
 echo '
 
-yolo() {
+old-yolo() {
     # Always unset GITHUB_TOKEN
     unset GITHUB_TOKEN
 
