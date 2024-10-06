@@ -1,26 +1,5 @@
 # public-dotfiles
 
+curl -o ~/.oh-my-zsh/custom/gha-ls.plugin.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/venkatamutyala-functions.zsh
 
-
-echo '
-debug-busybox() {
-    kubectl run -i --tty --rm busybox --image=busybox --restart=Never -- sh
-}
-
-debug-ubuntu() {
-    kubectl run -i --tty --rm busybox --image=ubuntu --restart=Never -- sh
-}
-' > ~/.oh-my-zsh/custom/debug-busybox.zsh
-
-echo '
-debug-ubuntu() {
-    kubectl run -i --tty --rm busybox --image=ubuntu --restart=Never -- sh
-}
-' > ~/.oh-my-zsh/custom/debug-ubuntu.zsh
-
-
-
-curl -o ~/.oh-my-zsh/custom/gha-ls.plugin.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/zsh-functions/gha-ls.zsh
-
-
-
+omz reload
