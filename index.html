@@ -2,11 +2,6 @@
 
 
 
-#!/bin/bash
-
-
-mkdir -p ~/.oh-my-zsh/custom/plugins/my-debug-functions
-
 echo '
 debug-busybox() {
     kubectl run -i --tty --rm busybox --image=busybox --restart=Never -- sh
@@ -15,10 +10,17 @@ debug-busybox() {
 debug-ubuntu() {
     kubectl run -i --tty --rm busybox --image=ubuntu --restart=Never -- sh
 }
-' > ~/.oh-my-zsh/custom/plugins/my-debug-functions/my-debug-functions.plugin.zsh
+' > ~/.oh-my-zsh/custom/debug-busybox.zsh
+
+echo '
+debug-ubuntu() {
+    kubectl run -i --tty --rm busybox --image=ubuntu --restart=Never -- sh
+}
+' > ~/.oh-my-zsh/custom/debug-ubuntu.zsh
 
 
-curl -o ~/.oh-my-zsh/custom/plugins/my-debug-functions/gha-ls.plugin.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/zsh-functions/gha-ls.zsh
+
+curl -o ~/.oh-my-zsh/custom/gha-ls.plugin.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/zsh-functions/gha-ls.zsh
 
 
 
