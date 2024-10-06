@@ -16,3 +16,9 @@ debug-ubuntu() {
     kubectl run -i --tty --rm busybox --image=ubuntu --restart=Never -- sh
 }
 ' > ~/.oh-my-zsh/custom/plugins/my-debug-functions/my-debug-functions.plugin.zsh
+
+
+curl -o ~/.oh-my-zsh/custom/plugins/my-debug-functions/gha-ls.plugin.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/zsh-functions/gha-ls.zsh
+
+
+
