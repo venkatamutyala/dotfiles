@@ -1,4 +1,4 @@
-function list_github_workflows() {
+function gha-ls() {
     # Define colors for alternating rows, statuses, and conclusions
     RESET="\033[0m"
     YELLOW="\033[1;33m"
