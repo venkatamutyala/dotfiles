@@ -51,7 +51,7 @@ function gha-ls() {
     repos=$(gh repo list "$ORG_NAME" --limit 1000 --json name --jq '.[].name')
 
     # Loop through each repository
-    for repo in $repos; do
+    echo "$repos" | while IFS= read -r repo; do
         # List active workflow runs based on user input statuses and conclusions
         if [[ "$statuses" == "all" ]]; then
             status_filter=""
@@ -78,12 +78,12 @@ function gha-ls() {
         if [[ "$run_count" -gt 0 ]]; then
             # Iterate over each run to get details and URL
             row=1
-            echo "$sorted_runs" | jq -r '.[] | .databaseId as $id | "Workflow Run: \(.name) (ID: \($id)) - Status: \(.status) - Conclusion: \(.conclusion) - Created At: \(.createdAt)\nGetting URL..."' | while read -r workflow_info; do
+            echo "$sorted_runs" | jq -r '.[] | .databaseId as $id | "Workflow Run: \(.name) (ID: \($id)) - Status: \(.status) - Conclusion: \(.conclusion) - Created At: \(.createdAt)\nGetting URL..."' | while IFS= read -r workflow_info; do
                 run_id=$(echo "$workflow_info" | grep -oP '(?<=\(ID: ).*(?=\))')
                 if [ -n "$run_id" ]; then
                     # Fetch the workflow URL using gh run view
                     run_url=$(gh run view "$run_id" --repo "$ORG_NAME/$repo" --json url --jq '.url')
-                    status=$(echo "$workflow_info" | grep -oP '(?<=- Status: ).*(?= - Conclusion)')
+                    run_status=$(echo "$workflow_info" | grep -oP '(?<=- Status: ).*(?= - Conclusion)')
                     conclusion=$(echo "$workflow_info" | grep -oP '(?<=- Conclusion: ).*(?= - Created)')
                     created_at=$(echo "$workflow_info" | grep -oP '(?<=- Created At: ).*')
 
@@ -91,17 +91,17 @@ function gha-ls() {
                     created_at_ago=$(time_ago "$created_at")
 
                     # Pad the status and conclusion to ensure proper alignment
-                    status_padded=$(printf "%-12s" "$status")
+                    status_padded=$(printf "%-12s" "$run_status")
                     conclusion_padded=$(printf "%-12s" "$conclusion")
 
                     # Color-code the status
-                    if [[ "$status" == "in_progress" ]]; then
+                    if [[ "$run_status" == "in_progress" ]]; then
                         status_color="$YELLOW$status_padded$RESET"
-                    elif [[ "$status" == "completed" ]]; then
+                    elif [[ "$run_status" == "completed" ]]; then
                         status_color="$GREEN$status_padded$RESET"
-                    elif [[ "$status" == "queued" ]]; then
+                    elif [[ "$run_status" == "queued" ]]; then
                         status_color="$BLUE$status_padded$RESET"
-                    elif [[ "$status" == "waiting" ]]; then
+                    elif [[ "$run_status" == "waiting" ]]; then
                         status_color="$CYAN$status_padded$RESET"
                     else
                         status_color="$status_padded"
