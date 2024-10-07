@@ -8,13 +8,14 @@ curl -o ~/.oh-my-zsh/custom/venkatamutyala-functions.zsh https://raw.githubuserc
 sed -i '/^plugins=(.*)/d' ~/.zshrc
 
 # Create a new file with the new plugins line and append the content of the original .zshrc
-echo "plugins=(git zsh-autosuggestions kubectl zsh-syntax-highlighting tsm)" > ~/.zshrc_new
+echo "plugins=(git zsh-autosuggestions kubectl zsh-syntax-highlighting)" > ~/.zshrc_new
 cat ~/.zshrc >> ~/.zshrc_new
 
 # Replace the old .zshrc with the new one
 mv ~/.zshrc_new ~/.zshrc
 
+
+rm -rf ~/.oh-my-zsh/custom/plugins/
 git clone --depth 1 --branch 0.8.0 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true
 git clone --depth 1 --branch v0.7.0 https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true
-git clone --depth 1 --branch v0.2.3 https://github.com/RobertAudi/tsm.git ~/.oh-my-zsh/custom/plugins/tsm || true
 
