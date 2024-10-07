@@ -1,3 +1,4 @@
+
 function gha-ls() {
     # Define colors for alternating rows, statuses, and conclusions
     RESET="\033[0m"
@@ -27,21 +28,49 @@ function gha-ls() {
         fi
     }
 
-    # Prompt for statuses, conclusions, and number of jobs to retrieve
-    echo "Please enter the GitHub organization name:"
-    read -r ORG_NAME
-    echo "Please enter the statuses to filter (e.g., in_progress, completed, queued, waiting). Leave empty for all:"
-    read -r statuses
-    echo "Please enter the conclusions to filter (e.g., success, failure, cancelled). Leave empty for all:"
-    read -r conclusions
-    echo "Please enter the number of jobs to pull up (e.g., 5, 10, 20):"
-    read -r job_limit
+    # Default values
+    ORG_NAME="GlueOps"
+    statuses="all"
+    conclusions="all"
+    job_limit=1
 
-    # If no input is given, set defaults
-    ORG_NAME=${ORG_NAME:-"GlueOps"}
-    statuses=${statuses:-"all"}
-    conclusions=${conclusions:-"all"}
-    job_limit=${job_limit:-1}
+    # Parse command-line options
+    while [[ "$1" != "" ]]; do
+        case $1 in
+            -o | --org )
+                shift
+                ORG_NAME="$1"
+                ;;
+            -s | --statuses )
+                shift
+                statuses="$1"
+                ;;
+            -c | --conclusions )
+                shift
+                conclusions="$1"
+                ;;
+            -l | --limit )
+                shift
+                job_limit="$1"
+                ;;
+            -h | --help )
+                echo "Usage: gha-ls [options]"
+                echo "Options:"
+                echo "  -o, --org            GitHub organization name (default: GlueOps)"
+                echo "  -s, --statuses       Statuses to filter (e.g., in_progress, completed, queued, waiting). Use 'all' for all statuses."
+                echo "  -c, --conclusions    Conclusions to filter (e.g., success, failure, cancelled). Use 'all' for all conclusions."
+                echo "  -l, --limit          Number of jobs to retrieve per repository (default: 1)"
+                echo "  -h, --help           Display this help message"
+                return
+                ;;
+            * )
+                echo "Invalid option: $1"
+                echo "Use -h or --help for usage information."
+                return 1
+                ;;
+        esac
+        shift
+    done
 
     # Print table header with column names
     echo -e "$(printf '%-120s %-25s %-12s %-12s\n' 'Job URL' 'Created At' 'Status' 'Conclusion')"
@@ -144,57 +173,107 @@ function gha-ls() {
 
 
 
-debug-busybox() {
-    kubectl run -i --tty --rm busybox --image=busybox --restart=Never -- sh
+debug-pod() {
+    # Default values
+    IMAGE="busybox"
+    COMMAND="sh"
+
+    # Parse command-line options
+    while [[ "$1" != "" ]]; do
+        case $1 in
+            -i | --image )
+                shift
+                IMAGE="$1"
+                ;;
+            -c | --command )
+                shift
+                COMMAND="$1"
+                ;;
+            -h | --help )
+                echo "Usage: debug-pod [options]"
+                echo "Options:"
+                echo "  -i, --image          Docker image to use (default: busybox)"
+                echo "  -c, --command        Command to run inside the container (default: sh)"
+                echo "  -h, --help           Display this help message"
+                return
+                ;;
+            * )
+                echo "Invalid option: $1"
+                echo "Use -h or --help for usage information."
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    kubectl run -i --tty --rm debug-pod --image="$IMAGE" --restart=Never -- "$COMMAND"
 }
 
-debug-ubuntu() {
-    kubectl run -i --tty --rm busybox --image=ubuntu --restart=Never -- sh
-}
+
+
+
+
+
 
 
 gha-trigger() {
   # Default values
   AUTO_APPROVE=false
+  BRANCH="main"
 
   # Parse command-line options
-  while [[ "$1" != "" ]]; do
-    case $1 in
-      --auto-approve | -y )
+  while getopts ":yo:w:b:h" opt; do
+    case $opt in
+      y)
         AUTO_APPROVE=true
         ;;
-      -h | --help )
-        echo "Usage: $0 [--auto-approve|-y]"
+      o)
+        ORG_NAME="$OPTARG"
+        ;;
+      w)
+        WORKFLOW_FILE="$OPTARG"
+        ;;
+      b)
+        BRANCH="$OPTARG"
+        ;;
+      h)
+        echo "Usage: $0 [-y] -o <organization_name> -w <workflow_file> [-b <branch_name>]"
         return
         ;;
-      * )
-        echo "Invalid option: $1"
-        echo "Usage: $0 [--auto-approve|-y]"
+      \?)
+        echo "Invalid option: -$OPTARG" >&2
+        echo "Usage: $0 [-y] -o <organization_name> -w <workflow_file> [-b <branch_name>]"
+        return 1
+        ;;
+      :)
+        echo "Option -$OPTARG requires an argument." >&2
+        echo "Usage: $0 [-y] -o <organization_name> -w <workflow_file> [-b <branch_name>]"
         return 1
         ;;
     esac
-    shift
   done
+  shift $((OPTIND -1))
 
-  # Prompt for inputs
-  read -p "Enter the organization name: " ORG_NAME
-  read -p "Enter the workflow filename (e.g., build.yml): " WORKFLOW_FILE
-  read -p "Enter the branch name [main]: " BRANCH
+  # Check for required arguments
+  if [[ -z "$ORG_NAME" || -z "$WORKFLOW_FILE" ]]; then
+    echo "Error: Organization name and workflow file are required."
+    echo "Usage: $0 [-y] -o <organization_name> -w <workflow_file> [-b <branch_name>]"
+    return 1
+  fi
 
-  # Set default branch if not provided
-  BRANCH=${BRANCH:-main}
-
-  # Get the list of repositories
+  # Fetch the list of repositories
   echo "Fetching repositories for organization '$ORG_NAME'..."
-  repos=$(gh repo list "$ORG_NAME" --limit 1000 --json name -q '.[].name')
 
-  if [ -z "$repos" ]; then
+  # Read the repositories into an array
+  repos=("${(@f)$(gh repo list "$ORG_NAME" --limit 1000 --json name -q '.[].name')}")
+
+  if [ ${#repos[@]} -eq 0 ]; then
     echo "No repositories found for organization '$ORG_NAME'."
     exit 1
   fi
 
   # Loop through each repository
-  for repo in $repos; do
+  for repo in "${repos[@]}"; do
     echo "Processing repository: $repo"
 
     # Fetch workflows in the repository
@@ -218,7 +297,7 @@ gha-trigger() {
         echo "Auto-approve enabled. Triggering workflow in $repo..."
         trigger=true
       else
-        read -p "Do you want to trigger the workflow in $repo? (y/n): " choice
+        vared -p "Do you want to trigger the workflow in $repo? (y/n): " -c choice
         case "$choice" in
           y|Y ) trigger=true ;;
           * ) trigger=false ;;
@@ -241,6 +320,3 @@ gha-trigger() {
 
   echo "Workflow triggering process completed."
 }
-
-
-
