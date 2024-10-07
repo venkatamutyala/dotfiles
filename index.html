@@ -2,3 +2,16 @@
 
 curl -o ~/.oh-my-zsh/custom/venkatamutyala-functions.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/venkatamutyala-functions.zsh
 
+
+
+# Remove existing plugins line
+sed -i '/^plugins=(.*)/d' ~/.zshrc
+
+# Create a new file with the new plugins line and append the content of the original .zshrc
+echo "plugins=(git zsh-autosuggestions kubectl)" > ~/.zshrc_new
+cat ~/.zshrc >> ~/.zshrc_new
+
+# Replace the old .zshrc with the new one
+mv ~/.zshrc_new ~/.zshrc
+
+
