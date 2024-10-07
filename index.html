@@ -8,7 +8,7 @@ curl -o ~/.oh-my-zsh/custom/venkatamutyala-functions.zsh https://raw.githubuserc
 sed -i '/^plugins=(.*)/d' ~/.zshrc
 
 # Create a new file with the new plugins line and append the content of the original .zshrc
-echo "plugins=(git zsh-autosuggestions kubectl)" > ~/.zshrc_new
+echo "plugins=(git zsh-autosuggestions kubectl zsh-syntax-highlighting)" > ~/.zshrc_new
 cat ~/.zshrc >> ~/.zshrc_new
 
 # Replace the old .zshrc with the new one
