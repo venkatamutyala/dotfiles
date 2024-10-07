@@ -153,3 +153,94 @@ debug-ubuntu() {
 }
 
 
+gha-trigger() {
+  # Default values
+  AUTO_APPROVE=false
+
+  # Parse command-line options
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      --auto-approve | -y )
+        AUTO_APPROVE=true
+        ;;
+      -h | --help )
+        echo "Usage: $0 [--auto-approve|-y]"
+        return
+        ;;
+      * )
+        echo "Invalid option: $1"
+        echo "Usage: $0 [--auto-approve|-y]"
+        return 1
+        ;;
+    esac
+    shift
+  done
+
+  # Prompt for inputs
+  read -p "Enter the organization name: " ORG_NAME
+  read -p "Enter the workflow filename (e.g., build.yml): " WORKFLOW_FILE
+  read -p "Enter the branch name [main]: " BRANCH
+
+  # Set default branch if not provided
+  BRANCH=${BRANCH:-main}
+
+  # Get the list of repositories
+  echo "Fetching repositories for organization '$ORG_NAME'..."
+  repos=$(gh repo list "$ORG_NAME" --limit 1000 --json name -q '.[].name')
+
+  if [ -z "$repos" ]; then
+    echo "No repositories found for organization '$ORG_NAME'."
+    exit 1
+  fi
+
+  # Loop through each repository
+  for repo in $repos; do
+    echo "Processing repository: $repo"
+
+    # Fetch workflows in the repository
+    workflows_json=$(gh api repos/"$ORG_NAME"/"$repo"/actions/workflows 2>/dev/null)
+
+    # Check if the API call was successful
+    if [ $? -ne 0 ] || [ -z "$workflows_json" ]; then
+      echo "Failed to fetch workflows for $repo or no workflows found."
+      echo "---------------------------------------"
+      continue
+    fi
+
+    # Try to find the workflow by path (filename)
+    workflow_id=$(echo "$workflows_json" | jq -r ".workflows[] | select(.path==\".github/workflows/$WORKFLOW_FILE\") | .id")
+
+    if [ -n "$workflow_id" ] && [ "$workflow_id" != "null" ]; then
+      echo "Found workflow '$WORKFLOW_FILE' in $repo."
+
+      # Check for auto-approve or prompt user
+      if [ "$AUTO_APPROVE" = true ]; then
+        echo "Auto-approve enabled. Triggering workflow in $repo..."
+        trigger=true
+      else
+        read -p "Do you want to trigger the workflow in $repo? (y/n): " choice
+        case "$choice" in
+          y|Y ) trigger=true ;;
+          * ) trigger=false ;;
+        esac
+      fi
+
+      if [ "$trigger" = true ]; then
+        # Trigger the workflow
+        gh workflow run "$workflow_id" --repo "$ORG_NAME"/"$repo" --ref "$BRANCH"
+        echo "Workflow triggered in $repo."
+      else
+        echo "Skipped triggering workflow in $repo."
+      fi
+    else
+      echo "Workflow '$WORKFLOW_FILE' not found in $repo."
+    fi
+
+    echo "---------------------------------------"
+  done
+
+  echo "Workflow triggering process completed."
+}
+
+
+
