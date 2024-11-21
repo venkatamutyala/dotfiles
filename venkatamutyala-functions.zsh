@@ -1,4 +1,19 @@
 
+function dev-start() {
+    if tmux has-session -t metrics 2>/dev/null; then
+        tmux attach-session -t metrics
+    else
+        tmux new-session -d -s metrics \; \
+            split-window -h \; \
+            send-keys 'htop' C-m \; \
+            split-window -v \; \
+            send-keys 'sudo nethogs' C-m \; \
+            select-pane -R \; \
+            attach
+    fi
+}
+
+
 function gha-ls() {
     # Define colors for alternating rows, statuses, and conclusions
     RESET="\033[0m"
