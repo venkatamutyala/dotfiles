@@ -1,0 +1,28 @@
+prSections:
+  - title: My Pull Requests
+    filters: is:open author:@me
+    layout:
+      author:
+        hidden: true
+        # width: <number of columns>
+        # grow: <bool> this will make the column grow in size
+  - title: Needs My Review
+    filters: is:open review-requested:@me
+  - title: Subscribed
+    filters: is:open -author:@me repo:cli/cli repo:dlvhdr/gh-dash
+  - title: GlueOps
+    filters: is:open archived:false org:GlueOps
+issuesSections:
+  - title: Created
+    filters: is:open author:@me
+  - title: Assigned
+    filters: is:open assignee:@me
+  - title: Subscribed
+    filters: is:open -author:@me repo:microsoft/vscode repo:dlvhdr/gh-dash
+defaults:
+  layout:
+    prs:
+      repo:
+        grow: true,
+        width: 10
+        hidden: false
