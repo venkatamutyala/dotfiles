@@ -8,10 +8,10 @@ prSections:
         # grow: <bool> this will make the column grow in size
   - title: Needs My Review
     filters: is:open review-requested:@me
-  - title: Subscribed
-    filters: is:open -author:@me repo:cli/cli repo:dlvhdr/gh-dash
   - title: GlueOps
     filters: is:open archived:false org:GlueOps
+  - title: Involved
+    filters: is:open involves:@me -author:@me
 issuesSections:
   - title: Created
     filters: is:open author:@me
