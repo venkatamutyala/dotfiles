@@ -1,0 +1,21 @@
+tmux_panes() {
+  local session_name="my_tmux_session"
+
+  cd ~ || return
+
+  if devbox run tmux has-session -t "$session_name" 2>/dev/null; then
+    echo "Reattaching to existing session '$session_name'..."
+    devbox run tmux attach-session -t "$session_name"
+  else
+    echo "Creating new session '$session_name'..."
+    devbox run tmux new-session -d -s "$session_name" \; \
+      send-keys 'htop' C-m \; \
+      split-window -h \; send-keys 'ping 1.1.1.1' C-m \; \
+      split-window -v \; send-keys 'ping 8.8.8.8' C-m \; \
+      split-window -v \; send-keys 'ping lens.l.google.com' C-m \; \
+      select-pane -t 0
+
+
+    devbox run tmux attach-session -t "$session_name"
+  fi
+}
