@@ -2,7 +2,10 @@
 
 # dotfiles | https://github.com/venkatamutyala/dotfiles
 
-
+rm -rf ~/.oh-my-zsh/custom/
+mkdir -p ~/.oh-my-zsh/custom/
+curl -o ~/.oh-my-zsh/custom/vm-manage.sh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/vm-manage.sh
+chmod +x ~/.oh-my-zsh/custom/vm-manage.sh
 curl -o ~/.oh-my-zsh/custom/venkatamutyala-functions.zsh https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/venkatamutyala-functions.zsh
 curl -o ~/.tmux.conf https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main/tmux.conf
 mkdir -p ~/.config/htop/
@@ -26,7 +29,6 @@ cat ~/.zshrc >> ~/.zshrc_new
 mv ~/.zshrc_new ~/.zshrc
 
 
-rm -rf ~/.oh-my-zsh/custom/plugins/
 mkdir -p ~/.oh-my-zsh/custom/plugins/
 git clone --depth 1 --branch 0.8.0 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true
 git clone --depth 1 --branch v0.7.0 https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true
