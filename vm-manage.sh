@@ -44,9 +44,9 @@ usage() {
 
 # --- Parse All Arguments ---
 # Initialize variables
-REMOTE_USER=""
-REMOTE_HOST=""
-KEYFILE_PATH=""
+REMOTE_USER="root"
+REMOTE_HOST="localhost"
+KEYFILE_PATH="/root/.ssh/id_rsa"
 COMMAND=""
 VM_NAME=""
 IMAGE_URL=""
