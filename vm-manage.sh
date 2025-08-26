@@ -45,7 +45,7 @@ usage() {
 # --- Parse All Arguments ---
 # Initialize variables
 REMOTE_USER="root"
-REMOTE_HOST="localhost"
+REMOTE_HOST="localhost:2222"
 KEYFILE_PATH="/root/.ssh/id_rsa"
 COMMAND=""
 VM_NAME=""
