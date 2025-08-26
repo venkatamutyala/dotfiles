@@ -7,7 +7,7 @@
 #
 # Usage: ./vm-manage.sh --user <user> --host <host> --key <keyfile> --command <command> --name <vm_name> [options]
 #
-# Example: ./vm-manage.sh --user root --host server.venkatamutyala.com:2222 --key /home/demo/.ssh/id_ed25519 --command list
+# Example: ./vm-manage.sh --user root --host server.venkatamutyala.com:2222 --key /root/.ssh/id_rsa --command list
 #
 
 # --- Function to print usage information and exit ---
