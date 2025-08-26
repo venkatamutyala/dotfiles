@@ -1,4 +1,13 @@
 
+vm() {
+    # Set the absolute path to your script
+    local script_path="$HOME/.oh-my-zsh/custom/vm-manage.sh"
+
+    # Execute the script, passing along ALL arguments
+    "$script_path" "$@"
+}
+
+
 function dev-start() {
     if tmux has-session -t metrics 2>/dev/null; then
         tmux attach-session -t metrics
