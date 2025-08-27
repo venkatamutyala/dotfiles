@@ -8,6 +8,12 @@ vm() {
 }
 
 
+sshpass() {
+  ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password "$@"
+}
+
+
+
 function dev-start() {
     if tmux has-session -t metrics 2>/dev/null; then
         tmux attach-session -t metrics
