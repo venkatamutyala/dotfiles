@@ -7,7 +7,7 @@
 #
 # Usage: ./vm-manage.sh <command> [options] --user <user> --host <host> --key <keyfile>
 #
-# Example: ./vm-manage.sh list --user root --host server.venkatamutyala.com:2222 --key /root/.ssh/id_rsa
+# Example: ./vm-manage.sh list --user root --host server.venkatamutyala.com --port 2222 --key /root/.ssh/id_rsa
 #
 
 # --- Function to print usage information and exit ---
@@ -15,9 +15,10 @@ usage() {
     echo "Usage: $0 <command> [options]"
     echo ""
     echo "Required Arguments:"
-    echo "  --user <user>               Username for the remote host."
-    echo "  --host <host>               IP address or hostname of the remote host."
-    echo "  --key <keyfile_path>        Path to the SSH private key."
+    echo "  --user <user>               Username for the remote host (default: root)."
+    echo "  --host <host>               IP address or hostname of the remote host (default: localhost)."
+    echo "  --port <port>               SSH port for the remote host (default: 2222)."
+    echo "  --key <keyfile_path>        Path to the SSH private key (default: /root/.ssh/id_rsa)."
     echo ""
     echo "Commands & Options:"
     echo "  --name <vm_name>            The name of the virtual machine (required for most commands)."
@@ -37,15 +38,16 @@ usage() {
     echo "    --tailscale-authkey <key> Automatically configure Tailscale."
     echo ""
     echo "Example:"
-    echo "  $0 create --name my-vm --image-url https://.../image.qcow2 --user root --host 100.103.122.107 --key /home/user/.ssh/id_ed25519"
+    echo "  $0 create --name my-vm --image-url https://.../image.qcow2 --user root --host localhost --port 2222 --key /root/.ssh/id_rsa"
     exit 1
 }
 
 # --- Parse All Arguments ---
 # Initialize variables
-REMOTE_USER=""                # <-- MODIFIED: Initialize as empty
-REMOTE_HOST=""                # <-- MODIFIED: Initialize as empty
-KEYFILE_PATH=""               # <-- MODIFIED: Initialize as empty
+REMOTE_USER=""
+REMOTE_HOST=""
+REMOTE_PORT=""
+KEYFILE_PATH=""
 COMMAND=""
 VM_NAME=""
 IMAGE_URL=""
@@ -71,6 +73,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --user) REMOTE_USER="$2"; shift 2 ;;
         --host) REMOTE_HOST="$2"; shift 2 ;;
+        --port) REMOTE_PORT="$2"; shift 2 ;;
         --key) KEYFILE_PATH="$2"; shift 2 ;;
         --name) VM_NAME="$2"; shift 2 ;;
         --image-url) IMAGE_URL="$2"; shift 2 ;;
@@ -85,10 +88,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# --- Set Defaults ---  # <-- NEW SECTION
+# --- Set Defaults ---
 # Use parameter expansion to set default values only if they are not already set.
 REMOTE_USER=${REMOTE_USER:-root}
-REMOTE_HOST=${REMOTE_HOST:-localhost:2222}
+REMOTE_HOST=${REMOTE_HOST:-localhost}
+REMOTE_PORT=${REMOTE_PORT:-2222}
 KEYFILE_PATH=${KEYFILE_PATH:-/root/.ssh/id_rsa}
 
 # --- Validate Required Arguments ---
@@ -98,7 +102,7 @@ if [ -z "$REMOTE_USER" ] || [ -z "$REMOTE_HOST" ] || [ -z "$KEYFILE_PATH" ] || [
 fi
 
 # Construct the connection string
-CONNECTION_STRING="qemu+ssh://${REMOTE_USER}@${REMOTE_HOST}/system?keyfile=${KEYFILE_PATH}&no_verify=1"
+CONNECTION_STRING="qemu+ssh://${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PORT}/system?keyfile=${KEYFILE_PATH}&no_verify=1"
 
 # --- Helper Functions ---
 run_virsh() {
@@ -156,10 +160,10 @@ create_vm() {
     echo "Downloading fresh base image to ${DISK_PATH} and resizing..." >&2
     
     # Download the image fresh every time and resize it in place.
-    ssh -t -i "$KEYFILE_PATH" "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
-        # Download directly to the final destination using curl for a clean progress bar
+    ssh -t -p "$REMOTE_PORT" -i "$KEYFILE_PATH" "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
+        # Download directly to the final destination using wget
         echo 'Downloading image...' >&2
-        sudo curl -L -s -S --progress-bar -o '${DISK_PATH}' '${IMAGE_URL}' &&
+        sudo wget -q --show-progress -O '${DISK_PATH}' '${IMAGE_URL}' &&
         
         # Resize the new disk in place
         echo 'Resizing new disk to ${DISK_SIZE_GB}G...' >&2
