@@ -35,7 +35,6 @@ usage() {
     echo "    --os-variant <variant>    Set OS variant (default: linux2022)."
     echo "    --bridge <bridge_name>    Set network bridge (default: virbr0)."
     echo "    --net-model <model>       Set network model (default: virtio)."
-    echo "    --tailscale-authkey <key> Automatically configure Tailscale."
     echo ""
     echo "Example:"
     echo "  $0 create --name my-vm --image-url https://.../image.qcow2 --user root --host localhost --port 2222 --key /root/.ssh/id_rsa"
@@ -54,7 +53,6 @@ IMAGE_URL=""
 RAM_MB=2048
 VCPUS=2
 DISK_SIZE_GB=20
-TAILSCALE_AUTHKEY=""
 OS_VARIANT="linux2022"
 NETWORK_BRIDGE="virbr0"
 NETWORK_MODEL="virtio"
@@ -80,7 +78,6 @@ while [[ $# -gt 0 ]]; do
         --ram) RAM_MB="$2"; shift 2 ;;
         --vcpus) VCPUS="$2"; shift 2 ;;
         --disk) DISK_SIZE_GB="$2"; shift 2 ;;
-        --tailscale-authkey) TAILSCALE_AUTHKEY="$2"; shift 2 ;;
         --os-variant) OS_VARIANT="$2"; shift 2 ;;
         --bridge) NETWORK_BRIDGE="$2"; shift 2 ;;
         --net-model) NETWORK_MODEL="$2"; shift 2 ;;
@@ -174,25 +171,18 @@ EOF
         echo "Error: Failed to download or resize disk on remote host." >&2 && exit 1
     fi
 
-    local CLOUD_INIT_TEMP_FILE=""
-    if [ -n "$TAILSCALE_AUTHKEY" ]; then
-        CLOUD_INIT_TEMP_FILE=$(mktemp)
-        # Use a quoted heredoc ('EOF') here to prevent local expansion of characters like `$`
-        cat > "$CLOUD_INIT_TEMP_FILE" <<'EOF'
+    # Create a minimal cloud-init configuration file
+    local CLOUD_INIT_TEMP_FILE=$(mktemp)
+    # Use a quoted heredoc ('EOF') here to prevent local expansion of `$`
+    cat > "$CLOUD_INIT_TEMP_FILE" <<'EOF'
 #cloud-config
 hostname: ${VM_NAME}
 manage_etc_hosts: true
 runcmd:
 - ['passwd', '-d', 'root']
-#- 'curl -fsSL https://tailscale.com/install.sh | sh'
-#- ['tailscale', 'up', '--authkey=${TAILSCALE_AUTHKEY}', '--hostname=${VM_NAME}']
-#- ['tailscale', 'set', '--ssh']
-#- ['tailscale', 'set', '--accept-routes']
 EOF
-        # Now, substitute the variables into the temp file
-        sed -i "s/\${VM_NAME}/${VM_NAME}/g" "$CLOUD_INIT_TEMP_FILE"
-        sed -i "s/\${TAILSCALE_AUTHKEY}/${TAILSCALE_AUTHKEY}/g" "$CLOUD_INIT_TEMP_FILE"
-    fi
+    # Now, substitute the VM_NAME variable into the temp file
+    sed -i "s/\${VM_NAME}/${VM_NAME}/g" "$CLOUD_INIT_TEMP_FILE"
 
     echo "Attempting to create VM with the following parameters:"
     echo "  RAM: ${RAM_MB}MB"
@@ -200,36 +190,29 @@ EOF
     echo "  Disk: ${DISK_PATH} (${DISK_SIZE_GB}GB)"
     echo "  OS Variant: ${OS_VARIANT}"
     echo "  Network: bridge=${NETWORK_BRIDGE}, model=${NETWORK_MODEL}"
-    [ -n "$TAILSCALE_AUTHKEY" ] && echo "  Cloud-Init: Enabled with Tailscale"
+    echo "  Cloud-Init: Enabled (sets hostname, removes root password)"
 
     local virt_install_cmd=(virt-install --connect "$CONNECTION_STRING"
         --name "$VM_NAME" --ram "$RAM_MB" --vcpus "$VCPUS"
         --os-variant "$OS_VARIANT"
         --disk "path=$DISK_PATH,format=qcow2,bus=virtio"
         --import --network "bridge=${NETWORK_BRIDGE},model=${NETWORK_MODEL}"
-        --graphics none --noautoconsole)
-
-    if [ -n "$TAILSCALE_AUTHKEY" ]; then
-        virt_install_cmd+=(--cloud-init "user-data=$CLOUD_INIT_TEMP_FILE")
-    fi
+        --graphics none --noautoconsole
+        --cloud-init "user-data=$CLOUD_INIT_TEMP_FILE")
 
     "${virt_install_cmd[@]}"
+    local exit_code=$?
     
-    if [ -n "$CLOUD_INIT_TEMP_FILE" ]; then
-        rm "$CLOUD_INIT_TEMP_FILE"
-    fi
+    # Clean up the temporary file
+    rm "$CLOUD_INIT_TEMP_FILE"
 
-    if [ $? -eq 0 ]; then
-        if [ -z "$TAILSCALE_AUTHKEY" ]; then
-            echo ""
-            echo "--- IMPORTANT ---"
-            echo "No cloud-init configuration was provided."
-            echo "The guest OS is not aware of the resized disk space."
-            echo "You will need to manually resize the partitions inside the VM."
-            echo "-----------------"
-        else
-            echo "VM creation initiated. Cloud-init will configure the guest on first boot."
-        fi
+    if [ $exit_code -eq 0 ]; then
+        echo "VM creation initiated. Cloud-init will configure the guest on first boot."
+        echo ""
+        echo "--- IMPORTANT ---"
+        echo "The guest OS is not aware of the resized disk space."
+        echo "You will need to manually resize the partitions inside the VM."
+        echo "-----------------"
     else
         echo "Error: virt-install command failed." >&2
     fi
