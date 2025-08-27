@@ -182,12 +182,12 @@ EOF
 #cloud-config
 hostname: ${VM_NAME}
 manage_etc_hosts: true
-runcmd:
-- 'curl -fsSL https://tailscale.com/install.sh | sh'
-- ['tailscale', 'up', '--authkey=${TAILSCALE_AUTHKEY}', '--hostname=${VM_NAME}']
-- ['tailscale', 'set', '--ssh']
-- ['tailscale', 'set', '--accept-routes']
-- ['passwd', '-d', 'root']
+#runcmd:
+#- 'curl -fsSL https://tailscale.com/install.sh | sh'
+#- ['tailscale', 'up', '--authkey=${TAILSCALE_AUTHKEY}', '--hostname=${VM_NAME}']
+#- ['tailscale', 'set', '--ssh']
+#- ['tailscale', 'set', '--accept-routes']
+#- ['passwd', '-d', 'root']
 EOF
         # Now, substitute the variables into the temp file
         sed -i "s/\${VM_NAME}/${VM_NAME}/g" "$CLOUD_INIT_TEMP_FILE"
