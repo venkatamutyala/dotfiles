@@ -5,23 +5,22 @@
 # This script provides a simple interface to manage remote virtual machines
 # using virsh with command-line flags for all parameters.
 #
-# Usage: ./vm-manage.sh --user <user> --host <host> --key <keyfile> --command <command> --name <vm_name> [options]
+# Usage: ./vm-manage.sh <command> [options] --user <user> --host <host> --key <keyfile>
 #
-# Example: ./vm-manage.sh --user root --host server.venkatamutyala.com:2222 --key /root/.ssh/id_rsa --command list
+# Example: ./vm-manage.sh list --user root --host server.venkatamutyala.com:2222 --key /root/.ssh/id_rsa
 #
 
 # --- Function to print usage information and exit ---
 usage() {
-    echo "Usage: $0 --user <user> --host <host> --key <keyfile> --command <command> --name <vm_name> [options]"
+    echo "Usage: $0 <command> [options]"
     echo ""
     echo "Required Arguments:"
     echo "  --user <user>               Username for the remote host."
     echo "  --host <host>               IP address or hostname of the remote host."
     echo "  --key <keyfile_path>        Path to the SSH private key."
-    echo "  --command <command>         The command to execute (list, create, delete, etc.)."
-    echo "  --name <vm_name>            The name of the virtual machine (required for most commands)."
     echo ""
     echo "Commands & Options:"
+    echo "  --name <vm_name>            The name of the virtual machine (required for most commands)."
     echo "  list                        List all virtual machines."
     echo "  status                      Get the status of a virtual machine."
     echo "  start, stop, destroy        Control a virtual machine's state."
@@ -38,15 +37,15 @@ usage() {
     echo "    --tailscale-authkey <key> Automatically configure Tailscale."
     echo ""
     echo "Example:"
-    echo "  $0 --user root --host 100.103.122.107 --key /home/user/.ssh/id_ed25519 --command create --name my-vm --image-url https://.../image.qcow2"
+    echo "  $0 create --name my-vm --image-url https://.../image.qcow2 --user root --host 100.103.122.107 --key /home/user/.ssh/id_ed25519"
     exit 1
 }
 
 # --- Parse All Arguments ---
 # Initialize variables
-REMOTE_USER="root"
-REMOTE_HOST="localhost:2222"
-KEYFILE_PATH="/root/.ssh/id_rsa"
+REMOTE_USER=""                # <-- MODIFIED: Initialize as empty
+REMOTE_HOST=""                # <-- MODIFIED: Initialize as empty
+KEYFILE_PATH=""               # <-- MODIFIED: Initialize as empty
 COMMAND=""
 VM_NAME=""
 IMAGE_URL=""
@@ -59,13 +58,20 @@ NETWORK_BRIDGE="virbr0"
 NETWORK_MODEL="virtio"
 
 
+# The command is the first positional argument
+if [[ $# -eq 0 ]] || [[ "$1" == -* ]]; then
+    echo "Error: A command (e.g., list, create, start) is required." >&2
+    usage
+fi
+COMMAND="$1"
+shift # Consume the command argument
+
 # Use a while loop to process all arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --user) REMOTE_USER="$2"; shift 2 ;;
         --host) REMOTE_HOST="$2"; shift 2 ;;
         --key) KEYFILE_PATH="$2"; shift 2 ;;
-        --command) COMMAND="$2"; shift 2 ;;
         --name) VM_NAME="$2"; shift 2 ;;
         --image-url) IMAGE_URL="$2"; shift 2 ;;
         --ram) RAM_MB="$2"; shift 2 ;;
@@ -79,9 +85,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# --- Set Defaults ---  # <-- NEW SECTION
+# Use parameter expansion to set default values only if they are not already set.
+REMOTE_USER=${REMOTE_USER:-root}
+REMOTE_HOST=${REMOTE_HOST:-localhost:2222}
+KEYFILE_PATH=${KEYFILE_PATH:-/root/.ssh/id_rsa}
+
 # --- Validate Required Arguments ---
 if [ -z "$REMOTE_USER" ] || [ -z "$REMOTE_HOST" ] || [ -z "$KEYFILE_PATH" ] || [ -z "$COMMAND" ]; then
-    echo "Error: Missing one or more required arguments: --user, --host, --key, --command" >&2
+    echo "Error: Missing one or more required arguments: a command, --user, --host, --key" >&2
     usage
 fi
 
