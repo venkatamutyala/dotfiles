@@ -128,4 +128,4 @@ map <leader>nf :NERDTreeFind<cr>
 
 
 
-autocmd vimenter * ++nested colorscheme gruvbox
+autocmd vimenter * ++nested silent! colorscheme gruvbox

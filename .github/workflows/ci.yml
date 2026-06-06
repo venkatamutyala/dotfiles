@@ -1,0 +1,22 @@
+name: CI
+
+# Run the installer integration test on every commit and PR.
+on:
+  push:
+  pull_request:
+
+jobs:
+  integration-test:
+    name: install + verify (debian ${{ matrix.debian }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        debian: [bookworm, bullseye]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run installer integration test in Debian ${{ matrix.debian }}
+        run: |
+          docker run --rm -v "$PWD":/repo:ro "debian:${{ matrix.debian }}" \
+            bash /repo/tests/integration-test.sh

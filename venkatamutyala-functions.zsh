@@ -1,4 +1,28 @@
 
+# --- Faster cursor / line editing -------------------------------------------
+# The default 0.4s key-sequence timeout makes the arrow keys feel laggy; 1 = 10ms.
+KEYTIMEOUT=1
+
+# Move word-by-word instead of char-by-char -- far faster than holding an arrow
+# key through a long line. Ctrl+Left/Right and Alt+Left/Right jump by word.
+bindkey '^[[1;5C' forward-word      # Ctrl+Right
+bindkey '^[[1;5D' backward-word     # Ctrl+Left
+bindkey '^[[1;3C' forward-word      # Alt+Right
+bindkey '^[[1;3D' backward-word     # Alt+Left
+bindkey '^[f'     forward-word      # Alt+f
+bindkey '^[b'     backward-word     # Alt+b
+bindkey '^[[H'    beginning-of-line # Home
+bindkey '^[[F'    end-of-line       # End
+bindkey '^[[3~'   delete-char       # Delete
+
+# On a local X11 desktop, bump the OS key-repeat so a held arrow moves faster
+# (250ms delay, 40 repeats/sec). No-op over SSH / Wayland / headless, where the
+# local terminal/OS owns the repeat rate -- set it there too.
+if [[ -n ${DISPLAY:-} ]] && command -v xset >/dev/null 2>&1; then
+  xset r rate 250 40 2>/dev/null
+fi
+
+
 vm() {
     # Set the absolute path to your script
     local script_path="$HOME/.oh-my-zsh/custom/vm-manage.sh"
