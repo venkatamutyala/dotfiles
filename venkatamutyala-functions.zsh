@@ -23,6 +23,42 @@ if [[ -n ${DISPLAY:-} ]] && command -v xset >/dev/null 2>&1; then
 fi
 
 
+# --- Claude Code ------------------------------------------------------------
+# The Claude Code installer drops its binary in ~/.local/bin; make sure it's on
+# PATH so `claude` is found (here and in future sessions).
+[[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
+
+# claude wrapper:
+#   * Auto-installs Claude Code on first use if it isn't on PATH yet.
+#   * `claude --yolo` -> `claude --dangerously-skip-permissions` (bypass mode).
+# `command claude` / `whence -p` target the real binary, not this function.
+claude() {
+  if ! whence -p claude >/dev/null 2>&1; then
+    print -r -- ">> Claude Code isn't installed -- installing it now..."
+    if ! curl -fsSL https://claude.ai/install.sh | bash; then
+      print -ru2 -- ">> Claude Code install failed. See https://docs.claude.com/claude-code"
+      return 1
+    fi
+    [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
+    rehash
+    if ! whence -p claude >/dev/null 2>&1; then
+      print -ru2 -- ">> Installed, but 'claude' isn't on PATH yet. Open a new shell and retry."
+      return 1
+    fi
+  fi
+
+  # Translate the --yolo alias into the real bypass-permissions flag.
+  # NB: don't name this array `argv` -- in zsh that's an alias for $@.
+  local -a cargs
+  local a
+  for a in "$@"; do
+    [[ "$a" == "--yolo" ]] && cargs+=(--dangerously-skip-permissions) || cargs+=("$a")
+  done
+
+  command claude "${cargs[@]}"
+}
+
+
 vm() {
     # Set the absolute path to your script
     local script_path="$HOME/.oh-my-zsh/custom/vm-manage.sh"

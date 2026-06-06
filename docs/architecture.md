@@ -63,6 +63,17 @@ Copy bindings cover mouse drag (`MouseDragEnd1Pane`), vi `v`/`y`, and
 double/triple-click. Caveats: the **local** terminal must allow OSC52 writes, and
 tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
 
+## Claude Code
+
+- `claude-settings.json` is installed to `~/.claude/settings.json` and enables
+  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` via its `env` block. The installer backs up
+  any existing settings before overwriting.
+- The `claude` zsh function (in `venkatamutyala-functions.zsh`) auto-installs Claude
+  Code on first use (`curl -fsSL https://claude.ai/install.sh | bash`, which drops the
+  binary in `~/.local/bin`) and translates `claude --yolo` →
+  `claude --dangerously-skip-permissions`. It uses `whence -p` / `command claude` so it
+  targets the real binary, not the function.
+
 ## Adding or renaming a config file
 
 1. Add a `fetch "${REPO_RAW}/<name>" <dest>` line in `fetch_configs`.

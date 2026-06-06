@@ -70,6 +70,19 @@ zsh -ic 'echo interactive-ok' 2>/dev/null | grep -qx interactive-ok \
 zsh -ic 'bindkey "^[[1;5C"' 2>/dev/null | grep -q forward-word \
   && pass "Ctrl+Right bound to forward-word (fast word navigation)" || fail "word-navigation keybinding not active"
 
+note "Claude Code integration (settings.json + claude wrapper)"
+grep -q 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS' "$HOME/.claude/settings.json" \
+  && pass "~/.claude/settings.json enables agent teams" || fail "settings.json missing CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+# Stub the claude binary so we can test the wrapper without installing/running it.
+mkdir -p "$HOME/.local/bin"
+printf '#!/bin/sh\necho "CLAUDE_ARGS: $*"\n' > "$HOME/.local/bin/claude"
+chmod +x "$HOME/.local/bin/claude"
+yolo_out="$(zsh -ic 'claude --yolo -p hi' 2>/dev/null)"
+printf '%s' "$yolo_out" | grep -q -- '--dangerously-skip-permissions' \
+  && pass "'claude --yolo' maps to --dangerously-skip-permissions" || fail "--yolo not translated (got: $yolo_out)"
+printf '%s' "$yolo_out" | grep -q -- '--yolo' \
+  && fail "--yolo leaked through to the claude binary" || pass "--yolo is not passed through literally"
+
 note "Idempotency (re-run must not change ~/.zshrc or duplicate plugins)"
 cp "$HOME/.zshrc" /tmp/zshrc.before
 REPO_RAW="file://$REPO" zsh "$REPO/index.html" >/dev/null

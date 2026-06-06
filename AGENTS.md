@@ -17,8 +17,9 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `tmux.conf` → `~/.tmux.conf` | Mouse on + OSC52 clipboard (`set-clipboard on`) + copy-mode bindings. |
 | `vimrc` → `~/.vimrc` | vim-plug + plugins, gruvbox colorscheme. |
 | `htoprc` → `~/.config/htop/htoprc` | htop layout. |
-| `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
+| `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`, `claude`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
+| `claude-settings.json` → `~/.claude/settings.json` | Claude Code settings; enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`. |
 | `tests/` | Docker integration test + local runner. |
 | `.github/workflows/ci.yml` | CI: runs the integration test on push/PR across debian bookworm + bullseye. |
 | `CNAME`, `LICENSE`, `README.md` | Pages domain, license, human docs. |
