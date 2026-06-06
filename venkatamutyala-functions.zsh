@@ -1,4 +1,68 @@
 
+# --- Faster cursor / line editing -------------------------------------------
+# The default 0.4s key-sequence timeout makes the arrow keys feel laggy; 1 = 10ms.
+KEYTIMEOUT=1
+
+# Move word-by-word instead of char-by-char -- far faster than holding an arrow
+# key through a long line. Ctrl+Left/Right and Alt+Left/Right jump by word.
+bindkey '^[[1;5C' forward-word      # Ctrl+Right
+bindkey '^[[1;5D' backward-word     # Ctrl+Left
+bindkey '^[[1;3C' forward-word      # Alt+Right
+bindkey '^[[1;3D' backward-word     # Alt+Left
+bindkey '^[f'     forward-word      # Alt+f
+bindkey '^[b'     backward-word     # Alt+b
+bindkey '^[[H'    beginning-of-line # Home
+bindkey '^[[F'    end-of-line       # End
+bindkey '^[[3~'   delete-char       # Delete
+
+# On a local X11 desktop, bump the OS key-repeat so a held arrow moves faster
+# (250ms delay, 40 repeats/sec). No-op over SSH / Wayland / headless, where the
+# local terminal/OS owns the repeat rate -- set it there too.
+if [[ -n ${DISPLAY:-} ]] && command -v xset >/dev/null 2>&1; then
+  xset r rate 250 40 2>/dev/null
+fi
+
+
+# --- Claude Code ------------------------------------------------------------
+# The Claude Code installer drops its binary in ~/.local/bin; make sure it's on
+# PATH so `claude` is found (here and in future sessions).
+[[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
+
+# claude wrapper:
+#   * Auto-installs Claude Code on first use if it isn't on PATH yet.
+#   * `claude --yolo` -> `claude --allow-dangerously-skip-permissions`, which
+#     *enables* the skip-permissions option for the session (you can turn it on)
+#     rather than auto-bypassing everything like --dangerously-skip-permissions.
+# `command claude` / `whence -p` target the real binary, not this function.
+claude() {
+  if ! whence -p claude >/dev/null 2>&1; then
+    # Pinned to the version that was latest as of 2026-05-07; override with
+    # CLAUDE_VERSION=latest (or a specific x.y.z) to bump.
+    print -r -- ">> Claude Code isn't installed -- installing ${CLAUDE_VERSION:-2.1.133}..."
+    if ! curl -fsSL https://claude.ai/install.sh | bash -s -- "${CLAUDE_VERSION:-2.1.133}"; then
+      print -ru2 -- ">> Claude Code install failed. See https://docs.claude.com/claude-code"
+      return 1
+    fi
+    [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
+    rehash
+    if ! whence -p claude >/dev/null 2>&1; then
+      print -ru2 -- ">> Installed, but 'claude' isn't on PATH yet. Open a new shell and retry."
+      return 1
+    fi
+  fi
+
+  # Translate the --yolo alias into the real bypass-permissions flag.
+  # NB: don't name this array `argv` -- in zsh that's an alias for $@.
+  local -a cargs
+  local a
+  for a in "$@"; do
+    [[ "$a" == "--yolo" ]] && cargs+=(--allow-dangerously-skip-permissions) || cargs+=("$a")
+  done
+
+  command claude "${cargs[@]}"
+}
+
+
 vm() {
     # Set the absolute path to your script
     local script_path="$HOME/.oh-my-zsh/custom/vm-manage.sh"
@@ -299,7 +363,7 @@ gha-trigger() {
 
   if [ ${#repos[@]} -eq 0 ]; then
     echo "No repositories found for organization '$ORG_NAME'."
-    exit 1
+    return 1
   fi
 
   # Loop through each repository

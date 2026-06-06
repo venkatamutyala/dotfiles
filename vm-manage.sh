@@ -218,7 +218,7 @@ EOF
     fi
 }
 
-get_status() {
+status_vm() {
     echo "Getting status for VM: $VM_NAME..."
     run_virsh dominfo "$VM_NAME"
 }
