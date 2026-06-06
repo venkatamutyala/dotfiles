@@ -25,8 +25,9 @@ exec zsh
   `plugins=(…)` line is rewritten).
 - **Zsh plugins:** `zsh-autosuggestions`, `zsh-syntax-highlighting`,
   `you-should-use` (+ Oh-My-Zsh `git` / `kubectl`).
-- **Config files:** `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`, and custom
-  scripts in `~/.oh-my-zsh/custom/` (`vm-manage.sh`, `venkatamutyala-functions.zsh`).
+- **Config files:** `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`,
+  `~/.claude/settings.json`, and custom scripts in `~/.oh-my-zsh/custom/`
+  (`vm-manage.sh`, `venkatamutyala-functions.zsh`).
 - Runs `vim +PlugInstall` so the vim-plug plugins install.
 
 ## Install these yourself (not installed by the script)
@@ -76,3 +77,17 @@ The *repeat speed* of a held-down arrow key is controlled by your local machine,
 not the remote box. On a Linux desktop: `xset r rate 250 40` (the config runs this
 automatically when `$DISPLAY` is set). In a VS Code / devcontainer terminal it's
 your local OS keyboard settings.
+
+## Claude Code
+
+- **Settings:** `~/.claude/settings.json` is installed enabling
+  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`. ⚠️ The installer **replaces** an existing
+  `~/.claude/settings.json` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
+  first), so anything you've added there — permissions, MCP servers, hooks — moves to
+  the backup. Re-merge what you need.
+- **`claude` wrapper** (in `venkatamutyala-functions.zsh`):
+  - If Claude Code isn't installed, the first `claude` run installs it via
+    `curl -fsSL https://claude.ai/install.sh | bash`.
+  - `claude --yolo` is shorthand for `claude --allow-dangerously-skip-permissions`,
+    which *enables* the skip-permissions option for the session (you can turn it on)
+    rather than bypassing every check automatically.

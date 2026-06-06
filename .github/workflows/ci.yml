@@ -5,6 +5,15 @@ on:
   push:
   pull_request:
 
+# Least-privilege token: the job only reads the repo.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same ref instead of piling up duplicates.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration-test:
     name: install + verify (debian ${{ matrix.debian }})

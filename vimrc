@@ -71,7 +71,8 @@ set incsearch
 set ignorecase
 set smartcase
 set showmatch
-map <leader><space> :let @/=''<cr> " clear search
+" clear search highlight (trailing comments on :map become part of the mapping)
+map <leader><space> :let @/=''<cr>
 
 " Remap help key.
 inoremap <F1> <ESC>:set invfullscreen<CR>a
@@ -88,7 +89,8 @@ set listchars=tab:▸\ ,eol:¬
 " Uncomment this to enable by default:
 " set list " To enable by default
 " Or use your leader key + l to toggle on/off
-map <leader>l :set list!<CR> " Toggle tabs and EOL
+" Toggle tabs and EOL display
+map <leader>l :set list!<CR>
 
 " Color scheme (terminal)
 set t_Co=256

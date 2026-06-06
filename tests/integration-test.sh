@@ -40,6 +40,17 @@ zsh -n "$REPO/index.html" && pass "zsh -n parses index.html" || fail "index.html
 printf '#<plaintext>\necho inert\n' | zsh | grep -qx inert \
   && pass "#<plaintext> is an inert comment in zsh (curl|zsh still runs)" \
   || fail "#<plaintext> broke zsh execution"
+# Regression guard for the 'can =' class of bug: the rest of this test always sets
+# REPO_RAW=file://, so the DEFAULT assignment is otherwise never exercised. Verify
+# the default line really assigns to REPO_RAW and resolves to a URL when unset.
+repo_raw_line="$(grep -n 'REPO_RAW:-' "$REPO/index.html" | head -1 | cut -d: -f2-)"
+printf '%s\n' "$repo_raw_line" | grep -Eq '^[[:space:]]*REPO_RAW=' \
+  && pass "default REPO_RAW line assigns to REPO_RAW" || fail "REPO_RAW default line is malformed: $repo_raw_line"
+default_repo_raw="$(unset REPO_RAW; eval "$repo_raw_line" 2>/dev/null; printf '%s' "${REPO_RAW:-}")"
+case "$default_repo_raw" in
+  https://*) pass "default REPO_RAW resolves to a URL ($default_repo_raw)";;
+  *) fail "default REPO_RAW did not resolve to a URL (got: '$default_repo_raw')";;
+esac
 
 note "tmux.conf validation (the copy/paste fix)"
 tmux -L citest -f "$REPO/tmux.conf" new-session -d -s t 'sleep 5'

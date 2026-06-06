@@ -361,7 +361,7 @@ gha-trigger() {
 
   if [ ${#repos[@]} -eq 0 ]; then
     echo "No repositories found for organization '$ORG_NAME'."
-    exit 1
+    return 1
   fi
 
   # Loop through each repository
