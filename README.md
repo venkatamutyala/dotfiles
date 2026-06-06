@@ -30,6 +30,11 @@ exec zsh
   (`vm-manage.sh`, `venkatamutyala-functions.zsh`).
 - Runs `vim +PlugInstall` so the vim-plug plugins install.
 
+All third-party code (Oh-My-Zsh, vim-plug, the vim/zsh plugins, Claude Code) is
+**pinned** to versions current as of 2026-05-07 for reproducible installs — bump the
+`*_REF` vars in `index.html`, the `{ 'commit': … }` values in `vimrc`, and
+`CLAUDE_VERSION` in `venkatamutyala-functions.zsh`.
+
 ## Install these yourself (not installed by the script)
 
 | Tool | Why |

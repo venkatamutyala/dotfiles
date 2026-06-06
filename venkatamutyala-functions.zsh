@@ -36,8 +36,10 @@ fi
 # `command claude` / `whence -p` target the real binary, not this function.
 claude() {
   if ! whence -p claude >/dev/null 2>&1; then
-    print -r -- ">> Claude Code isn't installed -- installing it now..."
-    if ! curl -fsSL https://claude.ai/install.sh | bash; then
+    # Pinned to the version that was latest as of 2026-05-07; override with
+    # CLAUDE_VERSION=latest (or a specific x.y.z) to bump.
+    print -r -- ">> Claude Code isn't installed -- installing ${CLAUDE_VERSION:-2.1.133}..."
+    if ! curl -fsSL https://claude.ai/install.sh | bash -s -- "${CLAUDE_VERSION:-2.1.133}"; then
       print -ru2 -- ">> Claude Code install failed. See https://docs.claude.com/claude-code"
       return 1
     fi

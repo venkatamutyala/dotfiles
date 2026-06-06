@@ -93,6 +93,18 @@ printf '%s' "$yolo_out" | grep -q -- '--allow-dangerously-skip-permissions' \
   && pass "'claude --yolo' maps to --allow-dangerously-skip-permissions" || fail "--yolo not translated (got: $yolo_out)"
 printf '%s' "$yolo_out" | grep -q -- '--yolo' \
   && fail "--yolo leaked through to the claude binary" || pass "--yolo is not passed through literally"
+grep -q 'install.sh | bash -s -- ' "$HOME/.oh-my-zsh/custom/venkatamutyala-functions.zsh" \
+  && pass "claude install pins a version (bash -s -- VERSION)" || fail "claude install is not version-pinned"
+
+note "Pinned dependency versions (reproducible installs)"
+omz_ref="$(grep -E '^OMZ_REF=' "$REPO/index.html" | head -1 | cut -d'"' -f2)"
+omz_got="$(git -C "$HOME/.oh-my-zsh" rev-parse HEAD 2>/dev/null)"
+[ -n "$omz_ref" ] && [ "$omz_got" = "$omz_ref" ] \
+  && pass "Oh-My-Zsh pinned at $omz_ref" || fail "Oh-My-Zsh not at pinned ref (want $omz_ref, got $omz_got)"
+gv_want="$(grep 'morhetz/gruvbox' "$REPO/vimrc" | grep -oE '[0-9a-f]{40}' | head -1)"
+gv_got="$(git -C "$HOME/.vim/plugged/gruvbox" rev-parse HEAD 2>/dev/null)"
+[ -n "$gv_want" ] && [ "$gv_got" = "$gv_want" ] \
+  && pass "vim plugin gruvbox pinned at $gv_want" || fail "gruvbox not at pinned commit (want $gv_want, got $gv_got)"
 
 note "Idempotency (re-run must not change ~/.zshrc or duplicate plugins)"
 cp "$HOME/.zshrc" /tmp/zshrc.before

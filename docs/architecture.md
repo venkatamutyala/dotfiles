@@ -75,6 +75,25 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
   option for the session rather than auto-bypassing everything). It uses `whence -p` /
   `command claude` so it targets the real binary, not the function.
 
+## Pinned versions
+
+All third-party code the installer pulls is pinned to the latest release/commit
+available as of **2026-05-07** (reproducible, supply-chain-safe installs):
+
+- **Oh-My-Zsh** and **vim-plug**: pinned commit SHAs (`OMZ_REF`, `VIM_PLUG_REF` in
+  index.html). OMZ is cloned and checked out at the pin instead of piping the upstream
+  installer to `sh`.
+- **zsh plugins**: pinned tags (`ZSH_SYNTAX_HIGHLIGHTING_REF`, `ZSH_AUTOSUGGESTIONS_REF`,
+  `YOU_SHOULD_USE_REF`).
+- **vim plugins**: pinned per-plugin commit SHAs via vim-plug `{ 'commit': '…' }` in vimrc.
+- **Claude Code**: the `claude` wrapper installs a pinned version (`CLAUDE_VERSION`,
+  default `2.1.133`); override with `CLAUDE_VERSION=latest`.
+
+To bump: edit the `*_REF` vars in index.html, the `{ 'commit': … }` values in vimrc, and
+`CLAUDE_VERSION` in venkatamutyala-functions.zsh. The integration test asserts the OMZ
+and gruvbox pins took effect. Note: OMZ is checked out at a detached commit, so
+`omz update` won't track master until you `git -C ~/.oh-my-zsh checkout master`.
+
 ## Adding or renaming a config file
 
 1. Add a `fetch "${REPO_RAW}/<name>" <dest>` line in `fetch_configs`.

@@ -22,6 +22,16 @@ set -euo pipefail
 # Where to fetch config files from. Override for testing a fork/branch/local
 # checkout, e.g. REPO_RAW="file:///repo" (used by the CI integration test).
 REPO_RAW="${REPO_RAW:-https://raw.githubusercontent.com/venkatamutyala/dotfiles/refs/heads/main}"
+
+# --- Pinned dependency versions (latest available as of 2026-05-07) ----------
+# Pinned for reproducible, supply-chain-safe installs. Bump deliberately.
+# SHAs are full commit hashes; zsh plugins use upstream tags.
+OMZ_REF="3604dc23e0d95b5ce9a3932838a7b103ef5ff0c1"          # ohmyzsh/ohmyzsh
+VIM_PLUG_REF="34467fc07d1bf1b3a6588e9d62711b9f7a8afda3"     # junegunn/vim-plug
+ZSH_SYNTAX_HIGHLIGHTING_REF="0.8.0"                         # zsh-users/zsh-syntax-highlighting
+ZSH_AUTOSUGGESTIONS_REF="v0.7.1"                            # zsh-users/zsh-autosuggestions
+YOU_SHOULD_USE_REF="1.11.1"                                 # MichaelAquilina/zsh-you-should-use
+
 TS="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="${HOME}/.dotfiles-backup-${TS}"
 
@@ -56,13 +66,15 @@ backup_existing() {
   done
 }
 
-install_omz() {                    # non-interactive; never clobbers .zshrc or login shell
+install_omz() {                    # pinned clone; non-interactive; never clobbers .zshrc or login shell
   if [[ -d ~/.oh-my-zsh ]]; then
     log "Oh-My-Zsh already present; skipping."
   else
-    log "Installing Oh-My-Zsh (non-interactive)"
-    RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
-      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    # Clone + checkout a pinned commit instead of piping the upstream installer
+    # to sh (reproducible, and no remote script execution).
+    log "Installing Oh-My-Zsh (pinned @ ${OMZ_REF})"
+    git -c advice.detachedHead=false clone --quiet https://github.com/ohmyzsh/ohmyzsh ~/.oh-my-zsh
+    git -C ~/.oh-my-zsh -c advice.detachedHead=false checkout --quiet "$OMZ_REF"
   fi
   [[ -f ~/.zshrc ]] || cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
 }
@@ -78,7 +90,7 @@ fetch_configs() {
   fetch "${REPO_RAW}/htoprc"                        ~/.config/htop/htoprc
   fetch "${REPO_RAW}/vimrc"                         ~/.vimrc
   fetch "${REPO_RAW}/claude-settings.json"          ~/.claude/settings.json
-  fetch "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" ~/.vim/autoload/plug.vim
+  fetch "https://raw.githubusercontent.com/junegunn/vim-plug/${VIM_PLUG_REF}/plug.vim" ~/.vim/autoload/plug.vim
 }
 
 configure_zshrc_plugins() {        # idempotent; handles single- & multi-line plugins=()
@@ -109,9 +121,9 @@ clone_plugin() {                   # idempotent; tolerates already-installed und
 install_zsh_plugins() {
   log "Installing zsh plugins"
   local p=~/.oh-my-zsh/custom/plugins; mkdir -p "$p"
-  clone_plugin https://github.com/zsh-users/zsh-syntax-highlighting      0.8.0  "$p/zsh-syntax-highlighting"
-  clone_plugin https://github.com/zsh-users/zsh-autosuggestions          v0.7.1 "$p/zsh-autosuggestions"
-  clone_plugin https://github.com/MichaelAquilina/zsh-you-should-use.git 1.10.0 "$p/you-should-use"
+  clone_plugin https://github.com/zsh-users/zsh-syntax-highlighting      "$ZSH_SYNTAX_HIGHLIGHTING_REF" "$p/zsh-syntax-highlighting"
+  clone_plugin https://github.com/zsh-users/zsh-autosuggestions          "$ZSH_AUTOSUGGESTIONS_REF"     "$p/zsh-autosuggestions"
+  clone_plugin https://github.com/MichaelAquilina/zsh-you-should-use.git "$YOU_SHOULD_USE_REF"          "$p/you-should-use"
 }
 
 install_vim_plugins() {
