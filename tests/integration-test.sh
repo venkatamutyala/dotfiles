@@ -40,17 +40,17 @@ zsh -n "$REPO/index.html" && pass "zsh -n parses index.html" || fail "index.html
 printf '#<plaintext>\necho inert\n' | zsh | grep -qx inert \
   && pass "#<plaintext> is an inert comment in zsh (curl|zsh still runs)" \
   || fail "#<plaintext> broke zsh execution"
-# Regression guard for the 'can =' class of bug: the rest of this test always sets
-# REPO_RAW=file://, so the DEFAULT assignment is otherwise never exercised. Verify
-# the default line really assigns to REPO_RAW and resolves to a URL when unset.
-repo_raw_line="$(grep -n 'REPO_RAW:-' "$REPO/index.html" | head -1 | cut -d: -f2-)"
+# REPO_RAW must be a well-formed assignment (regression guard for the 'can =' bug).
+repo_raw_line="$(grep -nE '^[[:space:]]*REPO_RAW=' "$REPO/index.html" | head -1 | cut -d: -f2-)"
 printf '%s\n' "$repo_raw_line" | grep -Eq '^[[:space:]]*REPO_RAW=' \
-  && pass "default REPO_RAW line assigns to REPO_RAW" || fail "REPO_RAW default line is malformed: $repo_raw_line"
-default_repo_raw="$(unset REPO_RAW; eval "$repo_raw_line" 2>/dev/null; printf '%s' "${REPO_RAW:-}")"
-case "$default_repo_raw" in
-  https://*) pass "default REPO_RAW resolves to a URL ($default_repo_raw)";;
-  *) fail "default REPO_RAW did not resolve to a URL (got: '$default_repo_raw')";;
-esac
+  && pass "REPO_RAW line assigns to REPO_RAW" || fail "REPO_RAW assignment malformed/missing: $repo_raw_line"
+# Install-from-tag resolution (DOTFILES_RESOLVE_ONLY dry-run; no network/TTY needed).
+r_tag="$(cd "$REPO" && env -u REPO_RAW DOTFILES_REF='v9.9.9-test' DOTFILES_RESOLVE_ONLY=1 zsh index.html 2>/dev/null | grep '^REPO_RAW=')"
+[ "$r_tag" = "REPO_RAW=https://raw.githubusercontent.com/venkatamutyala/dotfiles/v9.9.9-test" ] \
+  && pass "DOTFILES_REF resolves REPO_RAW to that tag's raw URL" || fail "tag resolution wrong: $r_tag"
+r_ovr="$(cd "$REPO" && REPO_RAW='file:///repo' DOTFILES_REF='v1' DOTFILES_RESOLVE_ONLY=1 zsh index.html 2>/dev/null | grep '^REPO_RAW=')"
+[ "$r_ovr" = "REPO_RAW=file:///repo" ] \
+  && pass "explicit REPO_RAW overrides DOTFILES_REF" || fail "REPO_RAW override failed: $r_ovr"
 
 note "tmux.conf validation (the copy/paste fix)"
 tmux -L citest -f "$REPO/tmux.conf" new-session -d -s t 'sleep 5'
@@ -105,6 +105,10 @@ gv_want="$(grep 'morhetz/gruvbox' "$REPO/vimrc" | grep -oE '[0-9a-f]{40}' | head
 gv_got="$(git -C "$HOME/.vim/plugged/gruvbox" rev-parse HEAD 2>/dev/null)"
 [ -n "$gv_want" ] && [ "$gv_got" = "$gv_want" ] \
   && pass "vim plugin gruvbox pinned at $gv_want" || fail "gruvbox not at pinned commit (want $gv_want, got $gv_got)"
+ysu_want="$(grep -oE 'YOU_SHOULD_USE_SHA="[0-9a-f]{40}"' "$REPO/index.html" | grep -oE '[0-9a-f]{40}')"
+ysu_got="$(git -C "$HOME/.oh-my-zsh/custom/plugins/you-should-use" rev-parse HEAD 2>/dev/null)"
+[ -n "$ysu_want" ] && [ "$ysu_got" = "$ysu_want" ] \
+  && pass "zsh plugin you-should-use verified at pinned SHA $ysu_want" || fail "you-should-use SHA mismatch (want $ysu_want, got $ysu_got)"
 
 note "Idempotency (re-run must not change ~/.zshrc or duplicate plugins)"
 cp "$HOME/.zshrc" /tmp/zshrc.before

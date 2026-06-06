@@ -75,6 +75,18 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
   option for the session rather than auto-bypassing everything). It uses `whence -p` /
   `command claude` so it targets the real binary, not the function.
 
+## Choosing a version (install-from-tag)
+
+`select_repo_ref()` decides which git ref of **this** repo the config files come from
+and sets `REPO_RAW`. Precedence: explicit `REPO_RAW` (tests use `file://`) >
+`DOTFILES_REF` env / `zsh -s -- <tag>` positional > interactive tag picker (lists
+`git ls-remote --tags` and reads the choice from `/dev/tty`, which works through the
+`curl | zsh` pipe since stdin is the script) > newest tag > `main` if the repo has no
+tags. `DOTFILES_RESOLVE_ONLY=1` prints the resolved `REPO_RAW` and exits (dry run; the
+integration test uses it). This pins the *config files* to an immutable tag — but the
+entry bootstrap (the served `index.html`) is still fetched live, so to also pin the
+install logic run `curl .../<tag>/index.html | zsh` directly.
+
 ## Pinned versions
 
 All third-party code the installer pulls is pinned to the latest release/commit
@@ -83,8 +95,8 @@ available as of **2026-05-07** (reproducible, supply-chain-safe installs):
 - **Oh-My-Zsh** and **vim-plug**: pinned commit SHAs (`OMZ_REF`, `VIM_PLUG_REF` in
   index.html). OMZ is cloned and checked out at the pin instead of piping the upstream
   installer to `sh`.
-- **zsh plugins**: pinned tags (`ZSH_SYNTAX_HIGHLIGHTING_REF`, `ZSH_AUTOSUGGESTIONS_REF`,
-  `YOU_SHOULD_USE_REF`).
+- **zsh plugins**: cloned by tag (`*_REF`), then the resolved commit is **verified
+  against a pinned SHA** (`*_SHA`) — a moved/tampered upstream tag aborts the install.
 - **vim plugins**: pinned per-plugin commit SHAs via vim-plug `{ 'commit': '…' }` in vimrc.
 - **Claude Code**: the `claude` wrapper installs a pinned version (`CLAUDE_VERSION`,
   default `2.1.133`); override with `CLAUDE_VERSION=latest`.

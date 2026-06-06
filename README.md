@@ -9,6 +9,15 @@ VMs / in devcontainers.
 curl setup.venkatamutyala.com | zsh
 ```
 
+The installer prompts for which **git tag** of this repo to install configs from
+(immutable tags give reproducible, tamper-evident installs). Skip the prompt by
+passing a ref:
+
+```bash
+curl setup.venkatamutyala.com | zsh -s -- v1.2.3          # positional
+curl setup.venkatamutyala.com | DOTFILES_REF=v1.2.3 zsh   # env var
+```
+
 You can also open <https://setup.venkatamutyala.com> in a browser to read the
 installer — it renders as the raw script, not a mangled web page.
 
