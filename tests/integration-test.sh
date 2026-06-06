@@ -78,8 +78,8 @@ mkdir -p "$HOME/.local/bin"
 printf '#!/bin/sh\necho "CLAUDE_ARGS: $*"\n' > "$HOME/.local/bin/claude"
 chmod +x "$HOME/.local/bin/claude"
 yolo_out="$(zsh -ic 'claude --yolo -p hi' 2>/dev/null)"
-printf '%s' "$yolo_out" | grep -q -- '--dangerously-skip-permissions' \
-  && pass "'claude --yolo' maps to --dangerously-skip-permissions" || fail "--yolo not translated (got: $yolo_out)"
+printf '%s' "$yolo_out" | grep -q -- '--allow-dangerously-skip-permissions' \
+  && pass "'claude --yolo' maps to --allow-dangerously-skip-permissions" || fail "--yolo not translated (got: $yolo_out)"
 printf '%s' "$yolo_out" | grep -q -- '--yolo' \
   && fail "--yolo leaked through to the claude binary" || pass "--yolo is not passed through literally"
 

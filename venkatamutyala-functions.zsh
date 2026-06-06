@@ -30,7 +30,9 @@ fi
 
 # claude wrapper:
 #   * Auto-installs Claude Code on first use if it isn't on PATH yet.
-#   * `claude --yolo` -> `claude --dangerously-skip-permissions` (bypass mode).
+#   * `claude --yolo` -> `claude --allow-dangerously-skip-permissions`, which
+#     *enables* the skip-permissions option for the session (you can turn it on)
+#     rather than auto-bypassing everything like --dangerously-skip-permissions.
 # `command claude` / `whence -p` target the real binary, not this function.
 claude() {
   if ! whence -p claude >/dev/null 2>&1; then
@@ -52,7 +54,7 @@ claude() {
   local -a cargs
   local a
   for a in "$@"; do
-    [[ "$a" == "--yolo" ]] && cargs+=(--dangerously-skip-permissions) || cargs+=("$a")
+    [[ "$a" == "--yolo" ]] && cargs+=(--allow-dangerously-skip-permissions) || cargs+=("$a")
   done
 
   command claude "${cargs[@]}"

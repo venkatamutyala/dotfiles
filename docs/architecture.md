@@ -71,8 +71,9 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
 - The `claude` zsh function (in `venkatamutyala-functions.zsh`) auto-installs Claude
   Code on first use (`curl -fsSL https://claude.ai/install.sh | bash`, which drops the
   binary in `~/.local/bin`) and translates `claude --yolo` →
-  `claude --dangerously-skip-permissions`. It uses `whence -p` / `command claude` so it
-  targets the real binary, not the function.
+  `claude --allow-dangerously-skip-permissions` (which *enables* the skip-permissions
+  option for the session rather than auto-bypassing everything). It uses `whence -p` /
+  `command claude` so it targets the real binary, not the function.
 
 ## Adding or renaming a config file
 
