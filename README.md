@@ -36,8 +36,8 @@ exec zsh
 
 ## What it installs
 
-- **Oh-My-Zsh** (non-interactive; your existing `~/.zshrc` is preserved, only the
-  `plugins=(…)` line is rewritten).
+- **Oh-My-Zsh** (cloned at a pinned commit; your existing `~/.zshrc` is preserved,
+  only the `plugins=(…)` line is rewritten).
 - **Zsh plugins:** `zsh-autosuggestions`, `zsh-syntax-highlighting`,
   `you-should-use` (+ Oh-My-Zsh `git` / `kubectl`).
 - **Config files:** `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`,
@@ -65,9 +65,9 @@ separately).
 ## Safety
 
 - Re-runnable / idempotent.
-- Existing `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`, custom scripts, and
-  `~/.zshrc` are copied into `~/.dotfiles-backup-<timestamp>/` before being
-  overwritten.
+- Existing `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`, `~/.zshrc`,
+  `~/.claude/settings.json`, and custom scripts are copied into
+  `~/.dotfiles-backup-<timestamp>/` before being overwritten.
 - The script does **not** change your login shell. To make zsh your default:
   `chsh -s "$(which zsh)"`.
 
@@ -106,8 +106,9 @@ your local OS keyboard settings.
   first), so anything you've added there — permissions, MCP servers, hooks — moves to
   the backup. Re-merge what you need.
 - **`claude` wrapper** (in `venkatamutyala-functions.zsh`):
-  - If Claude Code isn't installed, the first `claude` run installs it via
-    `curl -fsSL https://claude.ai/install.sh | bash`.
+  - If Claude Code isn't installed, the first `claude` run installs a **pinned
+    version** via `curl -fsSL https://claude.ai/install.sh | bash -s -- "${CLAUDE_VERSION:-2.1.133}"`
+    (override with `CLAUDE_VERSION=latest`).
   - `claude --yolo` is shorthand for `claude --allow-dangerously-skip-permissions`,
     which *enables* the skip-permissions option for the session (you can turn it on)
     rather than bypassing every check automatically.

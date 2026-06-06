@@ -19,40 +19,47 @@ Run in order by `main()`; the script uses `set -euo pipefail`:
 
 1. `os_guard` — require Linux (die otherwise); warn if not Debian/Ubuntu; require
    `git` + `curl`.
-2. `backup_existing` — copy any existing `~/.tmux.conf`, `~/.vimrc`,
-   `~/.config/htop/htoprc`, `~/.zshrc`, and the two custom scripts into
-   `~/.dotfiles-backup-<timestamp>/` (copy, not move — originals stay until
-   overwritten).
-3. `install_omz` — install Oh-My-Zsh **non-interactively**
-   (`RUNZSH=no CHSH=no KEEP_ZSHRC=yes … --unattended`) so the pipe never prompts,
-   never changes the login shell, never clobbers `.zshrc`. Skipped if already present.
-4. `fetch_configs` — `curl -fsSL` each config from `$REPO_RAW` into place, plus
-   vim-plug's `plug.vim`. Configs are **copied**, not symlinked.
-5. `configure_zshrc_plugins` — idempotently set the `plugins=(…)` line in `~/.zshrc`
+2. `select_repo_ref` — decide which git ref of this repo to install configs from and
+   set `REPO_RAW` (interactive prompt / automation escape hatches — see *Choosing a
+   version* below). `DOTFILES_RESOLVE_ONLY=1` stops here after printing `REPO_RAW`.
+3. `backup_existing` — copy any existing `~/.tmux.conf`, `~/.vimrc`,
+   `~/.config/htop/htoprc`, `~/.zshrc`, `~/.claude/settings.json`, and the two custom
+   scripts into `~/.dotfiles-backup-<timestamp>/` (copy, not move — originals stay
+   until overwritten).
+4. `install_omz` — install Oh-My-Zsh by **cloning it and checking out a pinned commit**
+   (`OMZ_REF`) rather than piping the upstream installer to `sh`. Skipped if already
+   present; creates `~/.zshrc` from the OMZ template if none exists.
+5. `fetch_configs` — `curl -fsSL` each config from `$REPO_RAW` into place, plus
+   vim-plug's `plug.vim` (pinned via `VIM_PLUG_REF`). Configs are **copied**, not
+   symlinked.
+6. `configure_zshrc_plugins` — idempotently set the `plugins=(…)` line in `~/.zshrc`
    with `awk` (handles single- and multi-line `plugins=(`; replaces only the first
    occurrence; safe to re-run). Replaces the old fragile `sed` approach.
-6. `install_zsh_plugins` — clone 3 **pinned** plugins (`zsh-syntax-highlighting`
-   0.8.0, `zsh-autosuggestions` v0.7.1, `you-should-use` 1.10.0); skip if present.
-7. `install_vim_plugins` — `vim +PlugInstall +qall` if `vim` exists; warn otherwise.
+7. `install_zsh_plugins` — clone the 3 zsh plugins by tag, then **verify** each
+   resolved commit against a pinned SHA (`*_SHA`): `zsh-syntax-highlighting` 0.8.0,
+   `zsh-autosuggestions` v0.7.1, `you-should-use` 1.11.1; skip if present.
+8. `install_vim_plugins` — `vim +PlugInstall +qall` if `vim` exists; warn otherwise.
 
 ## `REPO_RAW` override
 
-`REPO_RAW` defaults to the raw GitHub `main` URL but is overridable:
+`REPO_RAW` is normally resolved by `select_repo_ref` (see *Choosing a version*), but
+setting it explicitly overrides everything — no prompt, no ref lookup:
 
 ```sh
 REPO_RAW="file:///repo" zsh index.html
 ```
 
 The integration test sets `REPO_RAW="file:///repo"` so it installs the
-**checked-out** files (via curl's `file://` support), not whatever is on `main`.
+**checked-out** files (via curl's `file://` support), not whatever is on a tag/`main`.
 This is also useful for testing a fork/branch.
 
 ## Config placement: copy, not symlink
 
-Configs are fetched/copied into their `$HOME` locations. (A versioned
-clone-the-repo + symlink model was discussed but **deferred** — if revisited, the
-key constraint is the `curl | zsh` stdin gotcha above for any "pick a version"
-prompt.)
+Configs are fetched/copied into their `$HOME` locations from the selected ref. The
+"pick a version" UX is implemented (tag selection; the prompt reads from `/dev/tty`,
+sidestepping the `curl | zsh` stdin constraint), but a full clone-the-repo +
+**symlink** model remains **deferred** — switching versions still means re-running the
+installer rather than `git checkout`.
 
 ## tmux clipboard (the copy/paste fix)
 

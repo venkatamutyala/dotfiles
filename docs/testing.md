@@ -22,12 +22,19 @@ test validates the code in the current commit/branch.
 
 - **Polyglot:** `index.html` passes `zsh -n`; line 1 is exactly `#<plaintext>`; that
   marker is an inert comment in zsh (so `curl | zsh` still runs).
+- **Ref selection:** the `REPO_RAW` line is a well-formed assignment (guards the
+  `can =` corruption class); `DOTFILES_REF` resolves `REPO_RAW` to that tag's raw URL;
+  an explicit `REPO_RAW` overrides `DOTFILES_REF` (both via `DOTFILES_RESOLVE_ONLY=1`).
 - **tmux fix:** `tmux.conf` loads; `set-clipboard` is `on`; the `MouseDragEnd1Pane`
   copy binding exists.
 - **Install:** Oh-My-Zsh present; exactly one `plugins=(` line in `~/.zshrc`; the 3
-  pinned zsh plugins cloned; installed `~/.tmux.conf` contains the fix; `vm-manage.sh`
-  is executable; vim plugins (`gruvbox`, `NERDTree`, `fzf`) installed; interactive zsh
+  zsh plugins cloned; installed `~/.tmux.conf` contains the fix; `vm-manage.sh` is
+  executable; vim plugins (`gruvbox`, `NERDTree`, `fzf`) installed; interactive zsh
   loads cleanly; `Ctrl+Right` is bound to `forward-word` (word navigation).
+- **Pins:** Oh-My-Zsh HEAD == `OMZ_REF`; the gruvbox vim plugin == its pinned commit;
+  `you-should-use` == its pinned `*_SHA` (exercising the SHA-verification path).
+- **Claude Code:** `~/.claude/settings.json` enables agent teams; `claude --yolo`
+  maps to `--allow-dangerously-skip-permissions`; the claude install is version-pinned.
 - **Idempotency:** a second run leaves `~/.zshrc` byte-identical with one `plugins=(`
   line.
 - **Backups:** a `~/.dotfiles-backup-*` directory is created.
