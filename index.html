@@ -19,13 +19,12 @@
 
 set -euo pipefail
 
-# Where config files are installed FROM. Resolved by select_repo_ref(), precedence:
-#   1. REPO_RAW set explicitly (e.g. tests use file:///repo) -- wins, no prompt.
-#   2. DOTFILES_REF env, or `curl ... | zsh -s -- <tag>` -- that git ref, no prompt.
-#   3. interactive: pick a git tag of the repo (use immutable tags for reproducible,
-#      tamper-evident installs).
-#   4. no TTY -> newest tag; repo has no tags yet -> main.
-REPO_SLUG="venkatamutyala/dotfiles"
+# Which version of this repo to install config files from. An interactive run
+# ALWAYS prompts you to choose (the menu uses /dev/tty, so `curl ... | zsh` works).
+# Escape hatches: REPO_RAW (explicit source, e.g. file:///repo for tests) overrides
+# everything; and only when there is NO TTY, DOTFILES_REF / `zsh -s -- <tag>`, else
+# newest tag, else main. Use immutable tags for reproducible, tamper-evident installs.
+REPO_SLUG="${REPO_SLUG:-venkatamutyala/dotfiles}"
 REPO_RAW="${REPO_RAW:-}"
 DOTFILES_REF="${DOTFILES_REF:-}"
 
@@ -59,26 +58,32 @@ os_guard() {
   command -v curl >/dev/null 2>&1 || die "curl is required. Install it and re-run."
 }
 
-# Print the chosen git ref of this repo (menu goes to /dev/tty; only the ref is
-# printed to stdout so it can be captured). Falls back to newest tag / main.
+# This repo's tags, newest first (empty if none / offline).
+list_tags() {
+  git ls-remote --tags --refs "https://github.com/${REPO_SLUG}" 2>/dev/null \
+    | awk -F/ '{print $NF}' | sort -rV
+}
+
+# Interactive picker -- called only when /dev/tty is available. The menu is written
+# to and read from /dev/tty (works even though the piped script is stdin); only the
+# chosen ref is printed to stdout so it can be captured.
 pick_tag() {
-  local tags
-  tags="$(git ls-remote --tags --refs "https://github.com/${REPO_SLUG}" 2>/dev/null | awk -F/ '{print $NF}' | sort -rV)"
+  local tags; tags="$(list_tags)"
   if [[ -z "$tags" ]]; then
-    warn "No tags on ${REPO_SLUG} yet; installing from 'main'."
+    warn "No tags on ${REPO_SLUG} yet -- cut one (git tag v1 && git push --tags) to enable version selection. Installing from 'main'."
     print -r -- "refs/heads/main"; return 0
   fi
   local -a arr=("${(@f)tags}")
-  if [[ ! -r /dev/tty ]]; then
-    warn "No TTY; defaulting to newest tag: ${arr[1]}"
-    print -r -- "${arr[1]}"; return 0
-  fi
+  arr+=("refs/heads/main")                       # offer 'latest main' as a choice too
   {
     print -r -- ""
-    print -r -- "Select a version (git tag) of ${REPO_SLUG} to install:"
-    local i
-    for (( i = 1; i <= ${#arr[@]}; i++ )); do print -r -- "  ${i}) ${arr[$i]}"; done
-    print -rn -- "#? [1=${arr[1]}] "
+    print -r -- "Which version of ${REPO_SLUG} do you want to install?"
+    local i label
+    for (( i = 1; i <= ${#arr[@]}; i++ )); do
+      label="${arr[$i]}"; [[ "$label" == "refs/heads/main" ]] && label="main (latest, unpinned)"
+      print -r -- "  ${i}) ${label}"
+    done
+    print -rn -- "Enter a number [default 1 = ${arr[1]}]: "
   } >/dev/tty
   local choice=""
   read -r choice </dev/tty || true
@@ -87,18 +92,29 @@ pick_tag() {
   elif [[ "$choice" == <-> ]] && (( choice >= 1 && choice <= ${#arr[@]} )); then
     print -r -- "${arr[$choice]}"
   else
-    print -r -- "$choice"          # treat input as a literal tag/ref name
+    print -r -- "$choice"                        # treat input as a literal tag/ref name
   fi
 }
 
-# Resolve REPO_RAW to the selected git ref (unless explicitly overridden).
+# Resolve REPO_RAW. Interactive runs ALWAYS prompt; REPO_RAW / DOTFILES_REF are
+# escape hatches for automation.
 select_repo_ref() {
   if [[ -n "$REPO_RAW" ]]; then
     log "Using REPO_RAW override: ${REPO_RAW}"; return 0
   fi
-  local ref="$DOTFILES_REF"
-  [[ -z "$ref" && -n "${1:-}" ]] && ref="$1"
-  [[ -z "$ref" ]] && ref="$(pick_tag)"
+  local ref=""
+  # A real controlling terminal? Test by *opening* /dev/tty -- `[[ -r /dev/tty ]]`
+  # only checks the device's permission bits (always rw), not whether a tty exists.
+  if { true </dev/tty; } 2>/dev/null; then
+    ref="$(pick_tag)"                            # interactive: always ask the human
+  else
+    ref="${DOTFILES_REF:-${1:-}}"                # no TTY (CI/automation): env / positional
+    if [[ -z "$ref" ]]; then
+      local tags; tags="$(list_tags)"
+      if [[ -n "$tags" ]]; then local -a arr=("${(@f)tags}"); ref="${arr[1]}"; else ref="refs/heads/main"; fi
+    fi
+    warn "No TTY; non-interactive install from ref: ${ref}"
+  fi
   REPO_RAW="https://raw.githubusercontent.com/${REPO_SLUG}/${ref}"
   log "Installing config files from ref: ${ref}"
 }

@@ -9,14 +9,20 @@ VMs / in devcontainers.
 curl setup.venkatamutyala.com | zsh
 ```
 
-The installer prompts for which **git tag** of this repo to install configs from
-(immutable tags give reproducible, tamper-evident installs). Skip the prompt by
-passing a ref:
+When you run it interactively, the installer **prompts you to choose which version
+(git tag) to install** — nothing to pass:
 
-```bash
-curl setup.venkatamutyala.com | zsh -s -- v1.2.3          # positional
-curl setup.venkatamutyala.com | DOTFILES_REF=v1.2.3 zsh   # env var
+```text
+Which version of venkatamutyala/dotfiles do you want to install?
+  1) v2.0
+  2) v1.0
+  3) main (latest, unpinned)
+Enter a number [default 1 = v2.0]:
 ```
+
+(Immutable tags give reproducible, tamper-evident installs.) For unattended/CI use,
+escape hatches exist: set `REPO_RAW`, or run with no TTY plus `DOTFILES_REF=v1.2.3`
+(or `zsh -s -- v1.2.3`).
 
 You can also open <https://setup.venkatamutyala.com> in a browser to read the
 installer — it renders as the raw script, not a mangled web page.

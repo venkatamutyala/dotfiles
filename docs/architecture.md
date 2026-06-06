@@ -77,15 +77,20 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
 
 ## Choosing a version (install-from-tag)
 
-`select_repo_ref()` decides which git ref of **this** repo the config files come from
-and sets `REPO_RAW`. Precedence: explicit `REPO_RAW` (tests use `file://`) >
-`DOTFILES_REF` env / `zsh -s -- <tag>` positional > interactive tag picker (lists
-`git ls-remote --tags` and reads the choice from `/dev/tty`, which works through the
-`curl | zsh` pipe since stdin is the script) > newest tag > `main` if the repo has no
-tags. `DOTFILES_RESOLVE_ONLY=1` prints the resolved `REPO_RAW` and exits (dry run; the
-integration test uses it). This pins the *config files* to an immutable tag — but the
-entry bootstrap (the served `index.html`) is still fetched live, so to also pin the
-install logic run `curl .../<tag>/index.html | zsh` directly.
+`select_repo_ref()` sets `REPO_RAW` to the chosen git ref of **this** repo:
+
+- **Interactive (a TTY is present): always prompt** with a numbered menu of tags
+  (newest first) plus `main`. The menu is written to and read from `/dev/tty`, so it
+  works even though `curl | zsh` makes the script itself stdin.
+- `REPO_RAW` set explicitly (tests use `file://`) overrides everything — no prompt.
+- **No TTY** (CI/automation): `DOTFILES_REF` env / `zsh -s -- <tag>` positional, else
+  newest tag, else `main`.
+- `DOTFILES_RESOLVE_ONLY=1` prints the resolved `REPO_RAW` and exits (dry run; tests
+  use it). `REPO_SLUG` is overridable (fork-friendly).
+
+This pins the *config files* to an immutable tag — but the entry bootstrap (the served
+`index.html`) is still fetched live, so to also pin the install logic run
+`curl .../<tag>/index.html | zsh` directly.
 
 ## Pinned versions
 
