@@ -47,7 +47,9 @@ first failed assertion aborts the run.
 Add assertions with the `pass "msg"` / `fail "msg"` helpers, e.g.:
 
 ```sh
-[ -L "$HOME/.tmux.conf" ] && pass "..." || fail "..."
+# configs are copied (not symlinked), so assert on contents, e.g.:
+[ -f "$HOME/.tmux.conf" ] && grep -q 'set-clipboard on' "$HOME/.tmux.conf" \
+  && pass "..." || fail "..."
 ```
 
 When you add a config or feature, add a matching assertion and re-run both Debian
