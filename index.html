@@ -207,7 +207,20 @@ install_vim_plugins() {
   fi
 }
 
+# GlueOps CDE bootstrap. When this installer runs inside a GlueOps codespace, `cde-init` is
+# on PATH (gh auth from GITHUB_TOKEN, clone the repo, seed AutoGlue). Run it FIRST if present,
+# then continue with the dotfiles install. Non-fatal so a cde-init hiccup never blocks the rest.
+run_cde_init() {
+  if command -v cde-init >/dev/null 2>&1; then
+    log "Running cde-init (GlueOps CDE bootstrap)"
+    cde-init || warn "cde-init returned non-zero; continuing with dotfiles install."
+  else
+    log "cde-init not found; skipping (not a GlueOps codespace)."
+  fi
+}
+
 main() {
+  run_cde_init
   os_guard
   select_repo_ref "$@"
   # Dry run: print the resolved source and stop (no changes made).
