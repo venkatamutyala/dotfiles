@@ -213,14 +213,18 @@ install_vim_plugins() {
 run_cde_init() {
   if command -v cde-init >/dev/null 2>&1; then
     log "Running cde-init (GlueOps CDE bootstrap)"
-    cde-init || warn "cde-init returned non-zero; continuing with dotfiles install."
+    # </dev/null: this installer's stdin IS the `curl … | zsh` pipe; without this cde-init
+    # could read (and consume) the not-yet-parsed rest of the script, or hang waiting for
+    # input. Same guard the vim step uses below.
+    cde-init </dev/null || warn "cde-init returned non-zero; continuing with dotfiles install."
   else
     log "cde-init not found; skipping (not a GlueOps codespace)."
   fi
 }
 
 main() {
-  run_cde_init
+  # Run first — but not during a dry run (DOTFILES_RESOLVE_ONLY promises "no changes made").
+  [[ -n "${DOTFILES_RESOLVE_ONLY:-}" ]] || run_cde_init
   os_guard
   select_repo_ref "$@"
   # Dry run: print the resolved source and stop (no changes made).
