@@ -98,7 +98,8 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   experts (yaml, kubernetes, helm, argocd, etcd, ansible, golang, docker, shell,
   github-actions, terraform, python), plus a generic `domain-expert` that `/review` names
   a technology for when there's no dedicated expert; it pulls in as many experts as needed for
-  directly related technologies (nested subagents, one level). All are `model: inherit` and
+  directly related technologies, which can do the same (bounded by Claude Code's
+  three-level subagent depth limit). All are `model: inherit` and
   barred from editing files (`disallowedTools`). `skills/review/` routes a
   change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
   use the team for reviews and feature builds.
