@@ -52,6 +52,13 @@ r_ovr="$(cd "$REPO" && REPO_RAW='file:///repo' DOTFILES_REF='v1' DOTFILES_RESOLV
 [ "$r_ovr" = "REPO_RAW=file:///repo" ] \
   && pass "explicit REPO_RAW overrides DOTFILES_REF" || fail "REPO_RAW override failed: $r_ovr"
 
+# claude/MANIFEST must list exactly the files under claude/ (minus itself), or new
+# skills/agents would silently not install.
+want="$(cd "$REPO/claude" && find . -type f ! -name MANIFEST | sed 's|^\./||' | sort)"
+got="$(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$REPO/claude/MANIFEST" | grep -v '^$' | sort)"
+[ "$want" = "$got" ] && pass "claude/MANIFEST matches the claude/ tree" \
+  || fail "claude/MANIFEST out of sync with claude/:\n$(diff <(echo "$want") <(echo "$got"))"
+
 note "tmux.conf validation (the copy/paste fix)"
 tmux -L citest -f "$REPO/tmux.conf" new-session -d -s t 'sleep 5'
 clip="$(tmux -L citest show -g set-clipboard 2>/dev/null | awk '{print $2}')"
@@ -84,6 +91,12 @@ zsh -ic 'bindkey "^[[1;5C"' 2>/dev/null | grep -q forward-word \
 note "Claude Code integration (settings.json + claude wrapper)"
 grep -q 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS' "$HOME/.claude/settings.json" \
   && pass "~/.claude/settings.json enables agent teams" || fail "settings.json missing CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+while IFS= read -r rel; do
+  cmp -s "$REPO/claude/$rel" "$HOME/.claude/$rel" \
+    && pass "~/.claude/$rel installed from claude/$rel" || fail "~/.claude/$rel missing or differs from repo"
+done < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$REPO/claude/MANIFEST" | grep -v '^$')
+grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
+  && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"
 # Stub the claude binary so we can test the wrapper without installing/running it.
 mkdir -p "$HOME/.local/bin"
 printf '#!/bin/sh\necho "CLAUDE_ARGS: $*"\n' > "$HOME/.local/bin/claude"
@@ -119,5 +132,15 @@ diff -u /tmp/zshrc.before /tmp/zshrc.after && pass "~/.zshrc unchanged on re-run
 
 note "Backup behavior (existing files preserved before overwrite)"
 ls -d "$HOME"/.dotfiles-backup-* >/dev/null 2>&1 && pass "timestamped backup directory created" || fail "no backup directory created"
+ls "$HOME"/.dotfiles-backup-*/.claude/CLAUDE.md >/dev/null 2>&1 \
+  && pass "existing ~/.claude/CLAUDE.md backed up on re-run" || fail "~/.claude/CLAUDE.md not backed up"
+
+note "Legacy ref fallback (older tags have claude-settings.json, no claude/MANIFEST)"
+legacy="$(mktemp -d)"; cp -a "$REPO"/. "$legacy"/
+rm -rf "$legacy/claude"; printf '{"env":{"LEGACY_MARKER":"1"}}\n' > "$legacy/claude-settings.json"
+REPO_RAW="file://$legacy" zsh "$REPO/index.html" >/dev/null 2>&1 \
+  && pass "installer succeeds against a ref without claude/" || fail "installer failed on legacy ref"
+grep -q LEGACY_MARKER "$HOME/.claude/settings.json" \
+  && pass "legacy claude-settings.json installed to ~/.claude/settings.json" || fail "legacy settings not installed"
 
 note "ALL CHECKS PASSED"

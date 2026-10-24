@@ -41,7 +41,7 @@ exec zsh
 - **Zsh plugins:** `zsh-autosuggestions`, `zsh-syntax-highlighting`,
   `you-should-use` (+ Oh-My-Zsh `git` / `kubectl`).
 - **Config files:** `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`,
-  `~/.claude/settings.json`, and custom scripts in `~/.oh-my-zsh/custom/`
+  Claude Code config (`~/.claude/settings.json`, `~/.claude/CLAUDE.md`, …), and custom scripts in `~/.oh-my-zsh/custom/`
   (`vm-manage.sh`, `venkatamutyala-functions.zsh`).
 - Runs `vim +PlugInstall` so the vim-plug plugins install.
 
@@ -66,7 +66,7 @@ separately).
 
 - Re-runnable / idempotent.
 - Existing `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`, `~/.zshrc`,
-  `~/.claude/settings.json`, and custom scripts are copied into
+  the `~/.claude/` files this repo manages, and custom scripts are copied into
   `~/.dotfiles-backup-<timestamp>/` before being overwritten.
 - The script does **not** change your login shell. To make zsh your default:
   `chsh -s "$(which zsh)"`.
@@ -100,9 +100,11 @@ your local OS keyboard settings.
 
 ## Claude Code
 
-- **Settings:** `~/.claude/settings.json` is installed enabling
-  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`. ⚠️ The installer **replaces** an existing
-  `~/.claude/settings.json` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
+- **Config tree:** everything in `claude/` (listed in `claude/MANIFEST`) is installed
+  into `~/.claude/` — `settings.json` (enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`),
+  a global `CLAUDE.md`, and any skills/agents/commands/hooks added later.
+  ⚠️ The installer **replaces** an existing
+  `~/.claude/settings.json` / `~/.claude/CLAUDE.md` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
   first), so anything you've added there — permissions, MCP servers, hooks — moves to
   the backup. Re-merge what you need.
 - **`claude` wrapper** (in `venkatamutyala-functions.zsh`):

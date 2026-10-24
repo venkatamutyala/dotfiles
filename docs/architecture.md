@@ -23,9 +23,9 @@ Run in order by `main()`; the script uses `set -euo pipefail`:
    set `REPO_RAW` (interactive prompt / automation escape hatches — see *Choosing a
    version* below). `DOTFILES_RESOLVE_ONLY=1` stops here after printing `REPO_RAW`.
 3. `backup_existing` — copy any existing `~/.tmux.conf`, `~/.vimrc`,
-   `~/.config/htop/htoprc`, `~/.zshrc`, `~/.claude/settings.json`, and the two custom
-   scripts into `~/.dotfiles-backup-<timestamp>/` (copy, not move — originals stay
-   until overwritten).
+   `~/.config/htop/htoprc`, `~/.zshrc`, every `~/.claude/` file listed in
+   `claude/MANIFEST`, and the two custom scripts into `~/.dotfiles-backup-<timestamp>/`
+   (copy, not move — originals stay until overwritten).
 4. `install_omz` — install Oh-My-Zsh by **cloning it and checking out a pinned commit**
    (`OMZ_REF`) rather than piping the upstream installer to `sh`. Skipped if already
    present; creates `~/.zshrc` from the OMZ template if none exists.
@@ -72,9 +72,18 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a).
 
 ## Claude Code
 
-- `claude-settings.json` is installed to `~/.claude/settings.json` and enables
-  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` via its `env` block. The installer backs up
-  any existing settings before overwriting.
+- The `claude/` directory mirrors `~/.claude/`. `install_claude_config` fetches every
+  path listed in `claude/MANIFEST` from `${REPO_RAW}/claude/<path>` to
+  `~/.claude/<path>` (`*.sh` made executable). It only adds/overwrites listed files
+  (backed up first) — it never deletes, and never touches machine state
+  (`.credentials.json`, `history.jsonl`, `projects/`, `sessions/`, `~/.claude.json`).
+- Contents today: `settings.json` (enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`) and
+  a global `CLAUDE.md` (Docker-only workflow, Conventional Commits).
+- **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
+  `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
+  installer change needed. The test fails if the manifest and tree disagree.
+- **Old tags** have no `claude/MANIFEST`, only a top-level `claude-settings.json`; the
+  installer detects that and installs just the legacy settings file.
 - The `claude` zsh function (in `venkatamutyala-functions.zsh`) auto-installs Claude
   Code on first use (`curl -fsSL https://claude.ai/install.sh | bash`, which drops the
   binary in `~/.local/bin`) and translates `claude --yolo` →

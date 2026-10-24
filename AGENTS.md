@@ -19,7 +19,7 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `htoprc` → `~/.config/htop/htoprc` | htop layout. |
 | `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`, `claude`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
-| `claude-settings.json` → `~/.claude/settings.json` | Claude Code settings; enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`. |
+| `claude/` → `~/.claude/` | Claude Code config tree: `settings.json` (agent teams etc.), global `CLAUDE.md`, and later `skills/`, `agents/`, `commands/`, `hooks/`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
 | `tests/` | Docker integration test + local runner. |
 | `.github/workflows/ci.yml` | CI: runs the integration test on push/PR on debian bookworm. |
 | `.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json` | release-please: on push to `main`, opens a release PR from Conventional Commits; merging it creates the `vX.Y.Z` tag the installer offers. |
