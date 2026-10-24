@@ -58,6 +58,28 @@ not in `~/.claude/` — the installer overwrites this file.
 - Every main finding should state the concrete scenario that triggers it and why it
   matters. Don't pad the review; if nothing real turns up, say so.
 
+## Git and GitHub
+
+- Never push to `main`/`master`; work on a branch (e.g. `feat/<short-desc>`) and open
+  a PR.
+- Never force-push, amend pushed commits, or otherwise rewrite pushed history without
+  asking first.
+
+## Safety
+
+- Before every commit, scan staged changes for secrets, and before every push, scan the
+  commits being pushed. Stop and tell me if anything is found (exit code 1):
+  ```bash
+  docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 git --staged --redact
+  docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 git --redact --log-opts="origin/main..HEAD"
+  ```
+- Never commit or push customer data, PII, or tenant information (real company names,
+  people, emails, domains, cluster/tenant IDs, IPs). Use placeholders such as
+  `ACMECorp`, `foobar`, `user@example.com`, `example.com`.
+- Never print, log, or commit secrets. If one shows up in output, stop and tell me.
+- Ask before anything destructive or hard to undo: deleting resources, dropping data,
+  changing DNS.
+
 ## Commits
 
 - Use Conventional Commits: `type(scope): summary`, e.g. `feat(installer): …`,
