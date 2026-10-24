@@ -1,0 +1,5 @@
+# Files under claude/ to install into ~/.claude/ (one repo-relative path per line,
+# relative to claude/). The installer fetches each via REPO_RAW, so directories
+# like skills/<name>/ must list every file. CI fails if this drifts from the tree.
+CLAUDE.md
+settings.json
