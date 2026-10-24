@@ -35,7 +35,7 @@ test validates the code in the current commit/branch.
   `you-should-use` == its pinned `*_SHA` (exercising the SHA-verification path).
 - **Claude Code:** `claude/MANIFEST` matches the `claude/` tree exactly; every listed
   file lands byte-identical in `~/.claude/`; `~/.claude/settings.json` enables agent
-  teams; an existing `~/.claude/CLAUDE.md` is backed up on re-run; a ref without
+  teams and sets `CLAUDE_CODE_SHELL=/bin/bash`; an existing `~/.claude/CLAUDE.md` is backed up on re-run; a ref without
   `claude/` falls back to legacy `claude-settings.json`; `claude --yolo`
   maps to `--allow-dangerously-skip-permissions`; the claude install is version-pinned.
 - **Idempotency:** a second run leaves `~/.zshrc` byte-identical with one `plugins=(`

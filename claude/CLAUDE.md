@@ -12,6 +12,16 @@ not in `~/.claude/` — the installer overwrites this file.
 - Prefer official, version-pinned images (`python:3.12-slim`, not `python:latest`).
 - My CI and GitHub Actions pipelines always run in Docker images, so local runs
   should use the same images and commands CI uses.
+- Bind mounts: the Docker daemon may run on the host (e.g. from a devcontainer), so a
+  `-v` path must exist on the host too. If a mount comes up empty or fails, put the
+  files under `/workspaces/glueops` and mount from there, never from `/tmp` or the
+  scratchpad.
+
+## Shell
+
+- The Bash tool runs bash (`CLAUDE_CODE_SHELL=/bin/bash`), even though my login shell
+  is zsh. Write bash syntax; zsh-only functions and aliases from `~/.zshrc` are not
+  available there.
 
 ## Isolate and parallelize
 
