@@ -103,7 +103,8 @@ your local OS keyboard settings.
 - **Config tree:** everything in `claude/` (listed in `claude/MANIFEST`) is installed
   into `~/.claude/` — `settings.json` (enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
   and runs Claude's Bash tool under `/bin/bash` instead of your zsh login shell),
-  a global `CLAUDE.md`, and any skills/agents/commands/hooks added later.
+  a global `CLAUDE.md`, `guardrails.json` (deny/ask rules for secrets, loaded by the
+  `claude` wrapper only when you *don't* pass `--yolo`), and any skills/agents/commands/hooks added later.
   ⚠️ The installer **replaces** an existing
   `~/.claude/settings.json` / `~/.claude/CLAUDE.md` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
   first), so anything you've added there — permissions, MCP servers, hooks — moves to

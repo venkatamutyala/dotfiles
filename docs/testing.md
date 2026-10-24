@@ -37,7 +37,8 @@ test validates the code in the current commit/branch.
   file lands byte-identical in `~/.claude/`; `~/.claude/settings.json` enables agent
   teams and sets `CLAUDE_CODE_SHELL=/bin/bash`; an existing `~/.claude/CLAUDE.md` is backed up on re-run; a ref without
   `claude/` falls back to legacy `claude-settings.json`; `claude --yolo`
-  maps to `--allow-dangerously-skip-permissions`; the claude install is version-pinned.
+  maps to `--allow-dangerously-skip-permissions` and skips `guardrails.json`, while
+  plain `claude` loads it; the claude install is version-pinned.
 - **Idempotency:** a second run leaves `~/.zshrc` byte-identical with one `plugins=(`
   line.
 - **Backups:** a `~/.dotfiles-backup-*` directory is created.
