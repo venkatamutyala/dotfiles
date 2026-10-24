@@ -20,6 +20,8 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `htoprc` → `~/.config/htop/htoprc` | htop layout. |
 | `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`, `claude`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
+| `remote-access.sh` | Standalone, not installed by `index.html`. Served at setup.venkatamutyala.com/remote-access.sh; run via `curl … \| sh` **on a third-party remote box** (NAT'd/outbound-only, nothing pre-installed) to open an ephemeral, key-only SSH session over [tailcat](https://github.com/tailscale/tailcat) — no `sshd`, no package manager, no root required. |
+| `remote-session.sh` | Standalone, not installed by `index.html`. Control-side companion to `remote-access.sh`, run directly (`./remote-session.sh`) on the machine Claude Code operates from: `new` generates the session key material and the one-liner for the remote box; `connect` connects to it. Primary consumer is an agent, not a human typing commands. |
 | `claude/` → `~/.claude/` | Claude Code config tree: `settings.json`, global `CLAUDE.md`, `guardrails.json` (deny/ask rules + hooks, loaded only outside `--yolo`), `hooks/`, `agents/`, `skills/`, `statusline.sh`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
 | `tests/` | Docker integration test + local runner. |
 | `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the secret-scan hook test. |
