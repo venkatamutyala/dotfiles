@@ -44,6 +44,25 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
   Keep any new third-party fetch pinned.
 - **Verify every change in Docker before shipping** (see testing doc).
 
+## Decisions
+
+Settled; reviewers shouldn't re-raise these.
+
+- `claude --yolo` skips `guardrails.json` entirely (deny/ask rules and the secret-scan
+  hook), and guardrails only load through the zsh `claude` wrapper. Both on purpose.
+- Reviewer, verifier, and expert agents keep the Agent/Skill tools.
+- The dedicated `*-expert` agents stay alongside `domain-expert`; experts may pull in
+  related experts with no fixed limit.
+- No host-install blocker for now (removed: regex matching kept blocking normal Docker
+  use). The `CLAUDE.md` rule stays as an instruction.
+- The secret scan is a Claude Code hook, not a native git hook.
+- Bash permission rules are prefix/pattern matches, not a security boundary; that
+  limitation is accepted.
+- Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
+  second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
+  (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network
+  blip fetching `claude/MANIFEST` reads as "older tag"; CI `cancel-in-progress` on main.
+
 ## Verify your changes
 
 ```bash

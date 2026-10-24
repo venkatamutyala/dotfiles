@@ -53,6 +53,9 @@ not in `~/.claude/` — the installer overwrites this file.
 - Keep AGENTS.md concise: what the repo is, a short repo map, how to build/test (in
   Docker), and the standards or rules a new agent needs to contribute safely. Update it
   when those change.
+- Give AGENTS.md a short **Decisions** section: choices I've settled (and accepted edge
+  cases) that reviewers shouldn't re-raise. Add to it when I decide to keep, defer, or
+  reject something in a review.
 
 ## Agent teams
 

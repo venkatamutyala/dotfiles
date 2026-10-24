@@ -5,8 +5,10 @@ description: Review a change with a team of agents: core reviewers plus the doma
 
 # Team review
 
-1. **Scope.** Get the changed files and diff (`git diff <base>...HEAD` plus uncommitted
-   changes, or the PR/branch the user named).
+1. **Scope.** Fetch, then pin the exact refs under review: the PR's head commit (or
+   the branch/commit the user named, or the working tree) and its base. Get the
+   changed files and diff from those refs (`git diff <base>...<head>`), and read the
+   repo's AGENTS.md, including its **Decisions** section if there is one.
 2. **Pick the team.** Always the core reviewers: `correctness-reviewer`,
    `security-reviewer`, `simplicity-reviewer`, `tests-docs-reviewer`. Add every expert
    whose trigger the change matches:
@@ -29,16 +31,26 @@ description: Review a change with a team of agents: core reviewers plus the doma
    For any other technology the change uses, add a `domain-expert` and name the
    technology in its prompt (e.g. "You are a cert-manager expert"). Tell it which
    experts are already running, so the related experts it pulls in aren't duplicates.
-3. **Review in parallel.** Launch all chosen agents in one message. Give each the diff
-   (or file list), the repo's AGENTS.md if present, and these rules:
+3. **Review in parallel.** Launch all chosen agents in one message. Give each the exact
+   head and base refs, the diff (or file list), AGENTS.md, and these rules:
+   - Read code only from the given refs (`git show <ref>:<path>`), never from another
+     branch or a stale checkout.
+   - Read-only: no edits, commits, pushes, branch switches, PR/workflow/settings
+     changes. Experiments go in a throwaway directory that is deleted afterwards.
+   - Never run anything that prints credentials or tokens (`gh auth token`,
+     `gh auth status -t`, env dumps, credential files), and never try to prove a
+     bypass with a real secret. Use stand-ins and fake tokens generated at runtime.
+   - Don't re-report anything listed under AGENTS.md **Decisions**.
    - Report only issues that realistic usage would hit, each with `file:line`, the
-     concrete scenario that triggers it, and why it matters.
+     concrete scenario that triggers it, why it matters, and how you verified it.
    - Mark rare or speculative cases as edge cases, with how likely they are.
    - No style nits a linter would catch; say "nothing found" if so.
-4. **Verify.** Send all findings to `verifier` (split across several verifiers in
-   parallel if there are many). Drop REJECTED findings.
+4. **Verify.** De-duplicate first. A finding two or more reviewers reproduced
+   independently counts as verified. Send the rest to `verifier` with the same rules
+   (several verifiers in parallel if there are many), and drop REJECTED findings.
 5. **Report** in one merged list, de-duplicated, most severe first:
-   - **Findings:** CONFIRMED items, each with the evidence.
+   - **Findings:** verified items, each with the evidence and how many reviewers
+     found it.
    - **Edge cases (FYI):** EDGE CASE items with likelihood. Recommend a fix only if
      it's cheap and clearly worthwhile.
    - Which experts ran, so gaps are visible.
