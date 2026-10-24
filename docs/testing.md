@@ -44,7 +44,7 @@ test validates the code in the current commit/branch.
   `claude/` falls back to legacy `claude-settings.json`; `statusline.sh`
   renders; the `/ship`, `/review`, and `/design` skills are installed (`/design` keeps its approval
   checkpoint and passes the credentials rule to its agents); every agent's name matches its file,
-  uses `model: inherit`, carries the credentials safety rule, and is routed by `/review` or `/design`
+  uses `model: inherit`, carries the credentials safety rule, and is routed by `/review` or `/design`; every agent those skills name exists
   (which pass the same rule to their agents); `claude --yolo`
   maps to `--allow-dangerously-skip-permissions` and skips `guardrails.json`, while
   plain `claude` loads it; the claude install is version-pinned.

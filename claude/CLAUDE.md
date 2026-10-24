@@ -12,7 +12,6 @@ not in `~/.claude/` — the installer overwrites this file.
 - Prefer official, version-pinned images (`python:3.12-slim`, not `python:latest`).
 - My CI and GitHub Actions pipelines always run in Docker images, so local runs
   should use the same images and commands CI uses.
-- Infrastructure as code: OpenTofu (`tofu`), never Terraform.
 - Bind mounts: the Docker daemon may run on the host (e.g. from a devcontainer), so a
   `-v` path must exist on the host too. If a mount comes up empty or fails, put the
   files under `/workspaces/glueops` and mount from there, never from `/tmp` or the
@@ -26,16 +25,15 @@ not in `~/.claude/` — the installer overwrites this file.
 
 ## Long-running commands and waits
 
-Don't burn time on a command that's silently broken.
-
 - Before looping on a command (polling CI, a deploy, a PR), run it once and check its
-  output is what you expect.
-- Loops stop on the first error instead of retrying it; never hide the polled
-  command's errors with `2>/dev/null`.
-- Every wait is bounded (`timeout`, or a max number of attempts) and prints a status
-  line at least every 60 seconds. Run waits with the Monitor tool so each line
-  surfaces as it happens.
-- After starting anything in the background, check its output within the first minute.
+  output is what you expect. After starting a background job, read its output once
+  right away to confirm it started.
+- Loops stop on the first error instead of retrying it. Never hide the polled command's
+  errors with `2>/dev/null`; under Monitor, merge them in with `2>&1` (Monitor only
+  surfaces stdout).
+- Every wait is bounded (`timeout`, or a max number of attempts) and prints one status
+  line at least every 60 seconds (status lines, not raw logs). Run it under Monitor
+  with `timeout_ms` above the wait's own bound (max 30 min; re-arm for longer waits).
 
 ## Isolate and parallelize
 
@@ -53,6 +51,8 @@ Don't burn time on a command that's silently broken.
   options, or layers "for later".
 - Don't comment obvious code. Comment only the non-obvious *why* (a workaround, a
   constraint, a gotcha), in one short line where possible.
+
+- Infrastructure as code: OpenTofu (`tofu`), never Terraform.
 
 ## PRs and comments
 
