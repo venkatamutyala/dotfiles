@@ -22,7 +22,6 @@ agents/verifier.md
 agents/yaml-expert.md
 guardrails.json
 hooks/gitleaks-guard.sh
-hooks/no-host-install.sh
 settings.json
 skills/review/SKILL.md
 skills/ship/SKILL.md
