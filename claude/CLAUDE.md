@@ -87,11 +87,14 @@ not in `~/.claude/` — the installer overwrites this file.
 
 ## Safety
 
-- Before every commit, scan staged changes for secrets, and before every push, scan the
-  commits being pushed. Stop and tell me if anything is found (exit code 1):
+- Every commit and push is secret-scanned automatically by a hook (outside `--yolo`). If
+  it blocks, stop and tell me which file it named; don't open, print, or search files for
+  the secret.
+- Under `--yolo` (no hook), scan by hand before committing and pushing, and stop if either
+  exits non-zero:
   ```bash
-  docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 git --staged --redact
-  docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 git --redact --log-opts="origin/main..HEAD"
+  docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --staged --redact
+  docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --log-opts="--branches --not --remotes"
   ```
 - Never commit or push customer data, PII, or tenant information (real company names,
   people, emails, domains, cluster/tenant IDs, IPs). Use placeholders such as

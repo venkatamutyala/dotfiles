@@ -15,6 +15,7 @@
 # Env:
 #   REPO   path to the repo checkout (default: /repo)
 
+# shellcheck disable=SC2088  # "~" in pass/fail messages is display text
 set -euo pipefail
 
 REPO="${REPO:-/repo}"
@@ -132,6 +133,10 @@ printf '%s' "$plain_out" | grep -qF -- "--settings $HOME/.claude/guardrails.json
   && pass "plain 'claude' loads guardrails.json" || fail "guardrails not loaded without --yolo (got: $plain_out)"
 grep -q 'Read(~/.ssh/\*\*)' "$HOME/.claude/guardrails.json" \
   && pass "guardrails.json denies reading ~/.ssh" || fail "guardrails.json missing ~/.ssh deny"
+[ -x "$HOME/.claude/hooks/gitleaks-guard.sh" ] \
+  && jq -e '.hooks.PreToolUse[].hooks[] | select(.command | endswith("gitleaks-guard.sh")) | .onFailure == "block"' \
+       "$HOME/.claude/guardrails.json" >/dev/null \
+  && pass "secret-scan hook installed, executable, and wired (onFailure: block)" || fail "secret-scan hook missing or not wired"
 grep -q 'install.sh | bash -s -- ' "$HOME/.oh-my-zsh/custom/venkatamutyala-functions.zsh" \
   && pass "claude install pins a version (bash -s -- VERSION)" || fail "claude install is not version-pinned"
 

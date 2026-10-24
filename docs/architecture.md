@@ -17,21 +17,24 @@
 
 Run in order by `main()`; the script uses `set -euo pipefail`:
 
+0. `run_cde_init` — run GlueOps' `cde-init` first if it's on PATH (skipped on dry runs).
 1. `os_guard` — require Linux (die otherwise); warn if not Debian/Ubuntu; require
    `git` + `curl`.
 2. `select_repo_ref` — decide which git ref of this repo to install configs from and
    set `REPO_RAW` (interactive prompt / automation escape hatches — see *Choosing a
    version* below). `DOTFILES_RESOLVE_ONLY=1` stops here after printing `REPO_RAW`.
-3. `backup_existing` — copy any existing `~/.tmux.conf`, `~/.vimrc`,
-   `~/.config/htop/htoprc`, `~/.zshrc`, every `~/.claude/` file listed in
-   `claude/MANIFEST`, and the two custom scripts into `~/.dotfiles-backup-<timestamp>/`
-   (copy, not move — originals stay until overwritten).
+3. `load_claude_manifest` — read `claude/MANIFEST` from `$REPO_RAW` (older tags without
+   it fall back to `claude-settings.json`). Then `backup_existing` — copy any existing
+   `~/.tmux.conf`, `~/.vimrc`, `~/.config/htop/htoprc`, `~/.zshrc`, every `~/.claude/`
+   file listed in `claude/MANIFEST`, and the two custom scripts into
+   `~/.dotfiles-backup-<timestamp>/` (copy, not move — originals stay until overwritten).
 4. `install_omz` — install Oh-My-Zsh by **cloning it and checking out a pinned commit**
    (`OMZ_REF`) rather than piping the upstream installer to `sh`. Skipped if already
    present; creates `~/.zshrc` from the OMZ template if none exists.
 5. `fetch_configs` — `curl -fsSL` each config from `$REPO_RAW` into place, plus
    vim-plug's `plug.vim` (pinned via `VIM_PLUG_REF`). Configs are **copied**, not
    symlinked.
+   `install_claude_config` then fetches each `claude/MANIFEST` file into `~/.claude/`.
 6. `configure_zshrc_plugins` — idempotently set the `plugins=(…)` line in `~/.zshrc`
    with `awk` (handles single- and multi-line `plugins=(`; replaces only the first
    occurrence; safe to re-run). Replaces the old fragile `sed` approach.
@@ -103,6 +106,15 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   barred from editing files (`disallowedTools`). `skills/review/` routes a
   change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
   use the team for reviews and feature builds.
+- `guardrails.json` also registers the `hooks/gitleaks-guard.sh` `PreToolUse` hook (so it
+  follows the same "only outside `--yolo`" switch; `onFailure: block`). Before
+  `git commit` it scans staged changes (plus unstaged and untracked files when the
+  command also runs `git add` or `commit -a`); before `git push`, local commits on any
+  branch that aren't on a remote. It follows `cd`/`pushd`/subshells and git's
+  `-C`/`--git-dir`/`--work-tree` to the target repo, runs gitleaks in Docker
+  (digest-pinned, `--network none`, `stdin` mode, redacted), and names the file in its
+  block message. It blocks on findings, if the scan can't run, or if it can't tell which
+  repo the command targets. Needs `jq`.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.
