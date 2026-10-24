@@ -49,6 +49,7 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 ```bash
 tests/run-in-docker.sh bookworm   # tmux 3.3a
 tests/run-in-docker.sh trixie     # tmux 3.5a
+tests/hooks-test.sh               # Claude guardrail hooks (needs docker + jq)
 ```
 
 Both must end with `ALL CHECKS PASSED`. Pushing also runs CI.

@@ -103,6 +103,13 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   barred from editing files (`disallowedTools`). `skills/review/` routes a
   change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
   use the team for reviews and feature builds.
+- `guardrails.json` also registers two `PreToolUse` hooks (so they follow the same
+  "only outside `--yolo`" switch): `hooks/no-host-install.sh` blocks host installs
+  (`apt`/`pip`/`npm -g`/`go install`/`curl | sh`, …) but allows them inside
+  `docker run`; `hooks/gitleaks-guard.sh` runs before `git commit`/`git push` and
+  pipes uncommitted changes, untracked files, and unpushed commits into gitleaks
+  (Docker, `stdin` mode, redacted), blocking on findings or if the scan can't run.
+  Both need `jq`.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.

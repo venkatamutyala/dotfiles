@@ -103,8 +103,9 @@ your local OS keyboard settings.
 - **Config tree:** everything in `claude/` (listed in `claude/MANIFEST`) is installed
   into `~/.claude/` — `settings.json` (enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
   and runs Claude's Bash tool under `/bin/bash` instead of your zsh login shell),
-  a global `CLAUDE.md`, `guardrails.json` (deny/ask rules for secrets, loaded by the
-  `claude` wrapper only when you *don't* pass `--yolo`), a status line
+  a global `CLAUDE.md`, `guardrails.json` (deny/ask rules for secrets plus hooks that block
+  host installs and secret-scan before commit/push, loaded by the `claude` wrapper only
+  when you *don't* pass `--yolo`), a status line
   (`model | dir (branch) | ctx N%`, needs `jq`), the `/ship` skill, and a `/review` agent team (core reviewers + domain experts picked
   by what the change touches, every finding verified).
   ⚠️ The installer **replaces** an existing

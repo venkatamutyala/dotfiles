@@ -27,5 +27,30 @@
       "Bash(kubectl describe cm *)",
       "Bash(kubectl config view *)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/no-host-install.sh"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git commit *)",
+            "command": "~/.claude/hooks/gitleaks-guard.sh",
+            "statusMessage": "Scanning for secrets"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "command": "~/.claude/hooks/gitleaks-guard.sh",
+            "statusMessage": "Scanning for secrets"
+          }
+        ]
+      }
+    ]
   }
 }
