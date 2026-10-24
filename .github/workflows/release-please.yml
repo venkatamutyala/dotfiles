@@ -17,4 +17,4 @@ jobs:
         with:
           # PRs opened with the default GITHUB_TOKEN don't trigger CI. Set this secret to a
           # fine-grained PAT (contents + pull requests: write) so release PRs get checks.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          token: ${{ secrets.RELEASE_PLEASE || github.token }}

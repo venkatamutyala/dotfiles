@@ -97,7 +97,7 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
 
 Tags come from release-please: Conventional Commits on `main` accumulate in a release
 PR, and merging it creates the next `vX.Y.Z` tag (`feat` → minor, `fix` → patch). Set the
-`RELEASE_PLEASE_TOKEN` secret (fine-grained PAT) so release PRs trigger CI; without it the
+`RELEASE_PLEASE` secret (fine-grained PAT) so release PRs trigger CI; without it the
 action falls back to `GITHUB_TOKEN`, whose PRs get no checks.
 
 This pins the *config files* to an immutable tag — but the entry bootstrap (the served
