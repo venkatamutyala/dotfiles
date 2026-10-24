@@ -36,7 +36,8 @@ test validates the code in the current commit/branch.
 - **Claude Code:** `claude/MANIFEST` matches the `claude/` tree exactly; every listed
   file lands byte-identical in `~/.claude/`; `~/.claude/settings.json` enables agent
   teams and sets `CLAUDE_CODE_SHELL=/bin/bash`; an existing `~/.claude/CLAUDE.md` is backed up on re-run; a ref without
-  `claude/` falls back to legacy `claude-settings.json`; `claude --yolo`
+  `claude/` falls back to legacy `claude-settings.json`; `statusline.sh`
+  renders; the `/ship` skill is installed; `claude --yolo`
   maps to `--allow-dangerously-skip-permissions` and skips `guardrails.json`, while
   plain `claude` loads it; the claude install is version-pinned.
 - **Idempotency:** a second run leaves `~/.zshrc` byte-identical with one `plugins=(`
