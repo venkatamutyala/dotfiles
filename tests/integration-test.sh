@@ -123,6 +123,11 @@ for f in "$HOME"/.claude/agents/*.md; do
   grep -q 'Never run commands that print credentials' "$f" \
     || fail "agent $n is missing the credentials safety rule"
 done
+# And the reverse: every agent a skill names must exist.
+for n in $(grep -ohE '`([a-z]+-)+(expert|reviewer|engineer|researcher|owner|architect)`|`verifier`' \
+             "$HOME/.claude/skills/review/SKILL.md" "$HOME/.claude/skills/design/SKILL.md" | tr -d '`' | sort -u); do
+  [ -f "$HOME/.claude/agents/$n.md" ] || fail "a skill names agent $n, but ~/.claude/agents/$n.md doesn't exist"
+done
 pass "all $(ls "$HOME"/.claude/agents/*.md | wc -l) agents valid, inherit the session model, can't edit, carry the safety rule, and are routed by /review or /design"
 grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
   && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"

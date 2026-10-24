@@ -23,6 +23,18 @@ not in `~/.claude/` — the installer overwrites this file.
   is zsh. Write bash syntax; zsh-only functions and aliases from `~/.zshrc` are not
   available there.
 
+## Long-running commands and waits
+
+- Before looping on a command (polling CI, a deploy, a PR), run it once and check its
+  output is what you expect. After starting a background job, read its output once
+  right away to confirm it started.
+- Loops stop on the first error instead of retrying it. Never hide the polled command's
+  errors with `2>/dev/null`; under Monitor, merge them in with `2>&1` (Monitor only
+  surfaces stdout).
+- Every wait is bounded (`timeout`, or a max number of attempts) and prints one status
+  line at least every 60 seconds (status lines, not raw logs). Run it under Monitor
+  with `timeout_ms` above the wait's own bound (max 30 min; re-arm for longer waits).
+
 ## Isolate and parallelize
 
 - Give each independent task its own Docker network (`docker network create <name>`)
@@ -39,6 +51,8 @@ not in `~/.claude/` — the installer overwrites this file.
   options, or layers "for later".
 - Don't comment obvious code. Comment only the non-obvious *why* (a workaround, a
   constraint, a gotcha), in one short line where possible.
+
+- Infrastructure as code: OpenTofu (`tofu`), never Terraform.
 
 ## PRs and comments
 

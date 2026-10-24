@@ -25,7 +25,7 @@ description: Review a change with a team of agents: core reviewers plus the doma
    | `docker-expert` | `Dockerfile`, compose files, container scripts |
    | `shell-expert` | `*.sh`, `*.bash`, `*.zsh`, inline shell in CI |
    | `github-actions-expert` | `.github/workflows/`, `action.yml` |
-   | `terraform-expert` | `*.tf`, `*.tfvars` |
+   | `opentofu-expert` | `*.tf`, `*.tofu`, `*.tf.json`, `*.tofu.json`, `*.tfvars`, `*.tftest.hcl`, `*.tofutest.hcl`, `.terraform.lock.hcl` |
    | `python-expert` | `*.py`, Python packaging |
    | `sre-expert` | deployments, alerting/monitoring, infrastructure that runs in production |
 
