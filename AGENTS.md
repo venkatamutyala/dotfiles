@@ -14,7 +14,8 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | Path | Role |
 |------|------|
 | `index.html` | The installer. A `#!/bin/zsh` script despite the name; served at setup.venkatamutyala.com via GitHub Pages and run with `curl … \| zsh`. Line 1 is `#<plaintext>` so browsers render it as raw text. Prompts for which git tag to install configs from, and pins/verifies all third-party deps. |
-| `tmux.conf` → `~/.tmux.conf` | Mouse on + OSC52 clipboard (`set-clipboard on`) + copy-mode bindings. |
+| `tmux.conf` → `~/.tmux.conf` | Mouse on + OSC52 clipboard (`set-clipboard on`) + copy-mode bindings. `prefix + ?` shows a curated cheat sheet instead of tmux's default `list-keys` dump. |
+| `tmux-cheatsheet.txt` → `~/.tmux-cheatsheet.txt` | Plain-text reference shown by `tmux.conf`'s `prefix + ?` popup. |
 | `vimrc` → `~/.vimrc` | vim-plug + plugins, gruvbox colorscheme. |
 | `htoprc` → `~/.config/htop/htoprc` | htop layout. |
 | `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`, `claude`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
