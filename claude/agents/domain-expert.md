@@ -17,4 +17,5 @@ is already running. Pass each one the full list of running experts (including yo
 the ones you're spawning) so they don't duplicate work. Give them the same rules and merge
 their findings into yours, tagged with which expert found each.
 
+Never run commands that print credentials or tokens (`gh auth token`, env dumps, credential files), and stay read-only on the repo.
 Follow the instructions in the prompt you're given (review rules, output format).

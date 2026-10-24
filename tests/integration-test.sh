@@ -105,6 +105,8 @@ sl="$(printf '{"model":{"display_name":"Opus"},"workspace":{"current_dir":"%s"},
 grep -q '^name: ship$' "$HOME/.claude/skills/ship/SKILL.md" \
   && grep -q '^disable-model-invocation: true$' "$HOME/.claude/skills/ship/SKILL.md" \
   && pass "/ship skill installed (manual-only)" || fail "/ship skill missing or model-invocable"
+grep -q 'Never run anything that prints credentials' "$HOME/.claude/skills/review/SKILL.md" \
+  && pass "/review passes the credentials safety rule to reviewers" || fail "/review is missing the credentials safety rule"
 grep -q '^name: review$' "$HOME/.claude/skills/review/SKILL.md" \
   && pass "/review skill installed" || fail "/review skill missing"
 for f in "$HOME"/.claude/agents/*.md; do
@@ -113,8 +115,10 @@ for f in "$HOME"/.claude/agents/*.md; do
     || fail "agent $n: name must match filename, model must be inherit, and editing must be disallowed"
   grep -q "\`$n\`" "$HOME/.claude/skills/review/SKILL.md" \
     || fail "agent $n is not referenced by the /review skill"
+  grep -q 'Never run commands that print credentials' "$f" \
+    || fail "agent $n is missing the credentials safety rule"
 done
-pass "all $(ls "$HOME"/.claude/agents/*.md | wc -l) agents valid, inherit the session model, can't edit, and are routed by /review"
+pass "all $(ls "$HOME"/.claude/agents/*.md | wc -l) agents valid, inherit the session model, can't edit, carry the safety rule, and are routed by /review"
 grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
   && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"
 # Stub the claude binary so we can test the wrapper without installing/running it.
