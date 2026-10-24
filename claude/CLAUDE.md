@@ -33,6 +33,18 @@ not in `~/.claude/` — the installer overwrites this file.
 - Run independent jobs in parallel (e.g. a test matrix across images) rather than
   one after another.
 
+## Writing code
+
+- Keep it simple. Solve the problem in front of you; no speculative abstractions,
+  options, or layers "for later".
+- Don't comment obvious code. Comment only the non-obvious *why* (a workaround, a
+  constraint, a gotcha), in one short line where possible.
+
+## PRs and comments
+
+- Keep PR descriptions, review comments, and issue comments clear and concise: what
+  changed, why, and how it was tested. No filler or restating the diff.
+
 ## Code reviews
 
 - Verify every finding before reporting it: read the surrounding code, trace the real

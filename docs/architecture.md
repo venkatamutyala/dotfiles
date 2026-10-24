@@ -81,7 +81,8 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   `CLAUDE_CODE_SHELL=/bin/bash` so Claude's Bash tool doesn't inherit the zsh login
   shell, whose `=word` expansion and nomatch globbing break bash-style commands) and a
   global `CLAUDE.md` (Docker-only workflow, `/workspaces/glueops` bind mounts, bash,
-  verified-only code reviews, Conventional Commits).
+  simple code with minimal comments, concise PRs, verified-only code reviews,
+  Conventional Commits).
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.
