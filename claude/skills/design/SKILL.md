@@ -14,6 +14,9 @@ description: Design a new feature with a team of agents (product, UX, and develo
    - For anything developers or operators use (CLIs, platform or infrastructure
      tooling, CI, config, internal tools): `devtools-expert`, `infra-tools-expert`,
      `dx-expert`.
+   - For anything that runs in production: `sre-expert`.
+   - For anything touching access, secrets, tenant data, or network exposure:
+     `security-architect`.
    - The technology experts the feature touches, from the routing table in the
      `/review` skill (or a `domain-expert` naming the technology).
    - For any other perspective the feature needs (e.g. security architecture,

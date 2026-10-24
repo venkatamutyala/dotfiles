@@ -106,7 +106,8 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   barred from editing files (`disallowedTools`). `skills/review/` routes a
   change to the matching experts, then verifies findings.
 - The design team: `product-owner`, `ux-researcher`, `ux-expert`, `ux-engineer`, plus
-  `devtools-expert`, `infra-tools-expert`, and `dx-expert`, plus a generic `design-expert`
+  `devtools-expert`, `infra-tools-expert`, and `dx-expert`, `sre-expert`, `security-architect` (threat modeling at design time; `sre-expert` also
+  reviews production-facing changes), plus a generic `design-expert`
   that `/design` names a role for (security architect, SRE, …) and that can pull in
   related experts like `domain-expert` (same `inherit` / read-only setup). `skills/design/` consults them (and matching technology experts)
   in parallel, presents one design, and waits for approval before implementing.

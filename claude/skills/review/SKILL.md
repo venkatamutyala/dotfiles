@@ -27,6 +27,7 @@ description: Review a change with a team of agents: core reviewers plus the doma
    | `github-actions-expert` | `.github/workflows/`, `action.yml` |
    | `terraform-expert` | `*.tf`, `*.tfvars` |
    | `python-expert` | `*.py`, Python packaging |
+   | `sre-expert` | deployments, alerting/monitoring, CI/CD, infrastructure that runs in production |
 
    For any other technology the change uses, add a `domain-expert` and name the
    technology in its prompt (e.g. "You are a cert-manager expert"). Tell it which
