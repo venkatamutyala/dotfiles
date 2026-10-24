@@ -95,6 +95,8 @@ while IFS= read -r rel; do
   cmp -s "$REPO/claude/$rel" "$HOME/.claude/$rel" \
     && pass "~/.claude/$rel installed from claude/$rel" || fail "~/.claude/$rel missing or differs from repo"
 done < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$REPO/claude/MANIFEST" | grep -v '^$')
+grep -q '"CLAUDE_CODE_SHELL": "/bin/bash"' "$HOME/.claude/settings.json" \
+  && pass "settings.json pins Claude's Bash tool to /bin/bash" || fail "settings.json missing CLAUDE_CODE_SHELL=/bin/bash"
 grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
   && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"
 # Stub the claude binary so we can test the wrapper without installing/running it.

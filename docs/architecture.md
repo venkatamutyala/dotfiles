@@ -77,8 +77,11 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   `~/.claude/<path>` (`*.sh` made executable). It only adds/overwrites listed files
   (backed up first) — it never deletes, and never touches machine state
   (`.credentials.json`, `history.jsonl`, `projects/`, `sessions/`, `~/.claude.json`).
-- Contents today: `settings.json` (enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`) and
-  a global `CLAUDE.md` (Docker-only workflow, Conventional Commits).
+- Contents today: `settings.json` (enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`; sets
+  `CLAUDE_CODE_SHELL=/bin/bash` so Claude's Bash tool doesn't inherit the zsh login
+  shell, whose `=word` expansion and nomatch globbing break bash-style commands) and a
+  global `CLAUDE.md` (Docker-only workflow, `/workspaces/glueops` bind mounts, bash,
+  Conventional Commits).
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.
