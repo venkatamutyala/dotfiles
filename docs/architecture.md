@@ -68,7 +68,7 @@ forward copies to the **local** terminal's clipboard via **OSC52**, which is wha
 makes copy/paste work over SSH / in containers with no clipboard tool on the remote.
 Copy bindings cover mouse drag (`MouseDragEnd1Pane`), vi `v`/`y`, and
 double/triple-click. Caveats: the **local** terminal must allow OSC52 writes, and
-tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, bullseye = 3.1c).
+tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a).
 
 ## Claude Code
 
@@ -128,4 +128,4 @@ and gruvbox pins took effect. Note: OMZ is checked out at a detached commit, so
 1. Add a `fetch "${REPO_RAW}/<name>" <dest>` line in `fetch_configs`.
 2. Add the destination to the `backup_existing` loop.
 3. Add an assertion in `tests/integration-test.sh`.
-4. Run `tests/run-in-docker.sh` for both Debian versions.
+4. Run `tests/run-in-docker.sh`.

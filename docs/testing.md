@@ -6,11 +6,11 @@
   Designed to run **as root inside a fresh Debian/Ubuntu container** with the repo
   mounted read-only at `/repo`. It is **hermetic**: it sets `HOME="$(mktemp -d)"`, so
   it never touches real dotfiles and is safe to run anywhere with `apt`.
-- **`tests/run-in-docker.sh [bookworm|bullseye]`** — convenience wrapper that runs
+- **`tests/run-in-docker.sh [<debian-tag>]`** — convenience wrapper that runs
   the above in a throwaway `debian:<tag>` container, exactly like CI. Default
   `bookworm`.
 - **`.github/workflows/ci.yml`** — runs the test on every `push` and `pull_request`,
-  in a matrix across `debian:bookworm` (tmux 3.3a) and `debian:bullseye` (tmux 3.1c).
+  in `debian:bookworm` (tmux 3.3a).
 
 ## How the test installs the checked-out code
 
@@ -43,10 +43,9 @@ test validates the code in the current commit/branch.
 
 ```bash
 tests/run-in-docker.sh            # debian:bookworm
-tests/run-in-docker.sh bullseye   # debian:bullseye
 ```
 
-Both must finish with `ALL CHECKS PASSED`. The script is `set -euo pipefail`, so the
+It must finish with `ALL CHECKS PASSED`. The script is `set -euo pipefail`, so the
 first failed assertion aborts the run.
 
 ## Extending the test
@@ -59,5 +58,5 @@ Add assertions with the `pass "msg"` / `fail "msg"` helpers, e.g.:
   && pass "..." || fail "..."
 ```
 
-When you add a config or feature, add a matching assertion and re-run both Debian
-versions before shipping.
+When you add a config or feature, add a matching assertion and re-run the Docker test
+before shipping.
