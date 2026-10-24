@@ -107,15 +107,18 @@ grep -q '^name: ship$' "$HOME/.claude/skills/ship/SKILL.md" \
   && pass "/ship skill installed (manual-only)" || fail "/ship skill missing or model-invocable"
 grep -q 'Never run anything that prints credentials' "$HOME/.claude/skills/review/SKILL.md" \
   && pass "/review passes the credentials safety rule to reviewers" || fail "/review is missing the credentials safety rule"
-grep -q 'wait for the user' "$HOME/.claude/skills/design/SKILL.md" \
+grep -q '^name: design$' "$HOME/.claude/skills/design/SKILL.md" \
+  && grep -q "Don't write code until they approve" "$HOME/.claude/skills/design/SKILL.md" \
   && pass "/design stops for the user's go-ahead before implementing" || fail "/design is missing the approval checkpoint"
+grep -q 'Never run anything that prints credentials' "$HOME/.claude/skills/design/SKILL.md" \
+  && pass "/design passes the credentials safety rule to its agents" || fail "/design is missing the credentials safety rule"
 grep -q '^name: review$' "$HOME/.claude/skills/review/SKILL.md" \
   && pass "/review skill installed" || fail "/review skill missing"
 for f in "$HOME"/.claude/agents/*.md; do
   n="$(basename "$f" .md)"
   grep -q "^name: $n$" "$f" && grep -q '^model: inherit$' "$f" && grep -q '^disallowedTools: Edit, Write, NotebookEdit$' "$f" \
     || fail "agent $n: name must match filename, model must be inherit, and editing must be disallowed"
-  cat "$HOME/.claude/skills/review/SKILL.md" "$HOME/.claude/skills/design/SKILL.md" | grep -q "\`$n\`" \
+  grep -qF "\`$n\`" "$HOME/.claude/skills/review/SKILL.md" "$HOME/.claude/skills/design/SKILL.md" \
     || fail "agent $n is not referenced by the /review or /design skill"
   grep -q 'Never run commands that print credentials' "$f" \
     || fail "agent $n is missing the credentials safety rule"
