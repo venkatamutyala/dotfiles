@@ -93,7 +93,13 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
 - `statusline.sh` (wired via `statusLine` in `settings.json`) shows
   `model | dir (branch) | ctx N%`; needs `jq`.
 - `skills/ship/` is the `/ship` skill: verify, secret-scan, Conventional Commit, push,
-  open/update a PR.
+  open/update a PR Manual-only (`disable-model-invocation`), since it has side effects.
+- `agents/` holds the review/build team: core reviewers, a `verifier`, and domain
+  experts (yaml, kubernetes, helm, argocd, etcd, ansible, golang, docker, shell,
+  github-actions, terraform, python), all `model: inherit` and
+  barred from editing files (`disallowedTools`). `skills/review/` routes a
+  change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
+  use the team for reviews and feature builds.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.

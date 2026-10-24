@@ -1,6 +1,7 @@
 ---
 name: ship
-description: Commit, secret-scan, push, and open (or update) a PR for the current changes. Use when the user asks to ship, commit and push, or open a PR.
+description: Commit, secret-scan, push, and open (or update) a PR for the current changes.
+disable-model-invocation: true
 ---
 
 # Ship
