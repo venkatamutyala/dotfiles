@@ -28,6 +28,18 @@ fi
 # PATH so `claude` is found (here and in future sessions).
 [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
 
+# With CLAUDE_CODE_OAUTH_TOKEN set (non-interactive auth, e.g. CI/automation),
+# there's no human to click through the first-run onboarding flow -- mark it
+# done. Merges into ~/.claude.json if it exists, creates it if not.
+if [[ -n ${CLAUDE_CODE_OAUTH_TOKEN:-} ]] && command -v jq >/dev/null 2>&1; then
+  if [[ -f ~/.claude.json ]]; then
+    tmpfile="$(mktemp)" && jq '. + {"hasCompletedOnboarding": true}' ~/.claude.json > "$tmpfile" \
+      && mv "$tmpfile" ~/.claude.json
+  else
+    jq -n '{"hasCompletedOnboarding": true}' > ~/.claude.json
+  fi
+fi
+
 # claude wrapper:
 #   * Auto-installs Claude Code on first use if it isn't on PATH yet.
 #   * `claude --yolo` -> `claude --allow-dangerously-skip-permissions`, which
