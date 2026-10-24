@@ -31,9 +31,14 @@ not in `~/.claude/` — the installer overwrites this file.
 - Loops stop on the first error instead of retrying it. Never hide the polled command's
   errors with `2>/dev/null`; under Monitor, merge them in with `2>&1` (Monitor only
   surfaces stdout).
-- Every wait is bounded (`timeout`, or a max number of attempts) and prints one status
-  line at least every 60 seconds (status lines, not raw logs). Run it under Monitor
-  with `timeout_ms` above the wait's own bound (max 30 min; re-arm for longer waits).
+- Any task expected to run more than a minute — a background Bash job, a Monitor-
+  tracked wait, or a subagent (Agent tool) — gets a log: a first line describing the
+  task itself (what it's doing and why), then a short checkpoint/status line at least
+  once a minute (status lines, not raw logs) saying what's done and what's next, not
+  just a final report. Bound waits with `timeout`/a max attempt count, and run them
+  under Monitor with `timeout_ms` above the wait's own bound (max 30 min; re-arm for
+  longer waits). If I ask for status while something's running, read its log and
+  summarize it instead of just saying "still running."
 
 ## Isolate and parallelize
 
