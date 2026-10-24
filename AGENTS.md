@@ -19,9 +19,9 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `htoprc` → `~/.config/htop/htoprc` | htop layout. |
 | `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`, `claude`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
-| `claude/` → `~/.claude/` | Claude Code config tree: `settings.json` (agent teams etc.), global `CLAUDE.md`, and later `skills/`, `agents/`, `commands/`, `hooks/`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
+| `claude/` → `~/.claude/` | Claude Code config tree: `settings.json`, global `CLAUDE.md`, `guardrails.json` (deny/ask rules + hooks, loaded only outside `--yolo`), `hooks/`, `agents/`, `skills/`, `statusline.sh`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
 | `tests/` | Docker integration test + local runner. |
-| `.github/workflows/ci.yml` | CI: runs the integration test on push/PR across debian bookworm + trixie. |
+| `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the guardrail hook tests. |
 | `.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json` | release-please: on push to `main`, opens a release PR from Conventional Commits; merging it creates the `vX.Y.Z` tag the installer offers. |
 | `docs/` (`architecture.md`, `testing.md`) | Detailed agent docs, imported by `AGENTS.md`. |
 | `CLAUDE.md`, `CNAME`, `LICENSE`, `README.md` | Claude entry (imports `AGENTS.md`), Pages domain, license, human docs. |
@@ -52,7 +52,7 @@ tests/run-in-docker.sh trixie     # tmux 3.5a
 tests/hooks-test.sh               # Claude guardrail hooks (needs docker + jq)
 ```
 
-Both must end with `ALL CHECKS PASSED`. Pushing also runs CI.
+Each must end with `ALL CHECKS PASSED` (`ALL HOOK CHECKS PASSED` for the hook test). Pushing also runs CI.
 
 ## Detailed docs (imported)
 
