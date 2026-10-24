@@ -45,6 +45,15 @@ not in `~/.claude/` — the installer overwrites this file.
 - Keep PR descriptions, review comments, and issue comments clear and concise: what
   changed, why, and how it was tested. No filler or restating the diff.
 
+## Agent docs
+
+- When creating a new repo, or when asked to update or check a repo's docs, and the
+  repo has no AGENTS.md: create one, plus a CLAUDE.md that only imports it
+  (`@AGENTS.md`), so other AI tools share the same instructions.
+- Keep AGENTS.md concise: what the repo is, a short repo map, how to build/test (in
+  Docker), and the standards or rules a new agent needs to contribute safely. Update it
+  when those change.
+
 ## Code reviews
 
 - Verify every finding before reporting it: read the surrounding code, trace the real

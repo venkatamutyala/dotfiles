@@ -83,6 +83,7 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   global `CLAUDE.md` (Docker-only workflow, `/workspaces/glueops` bind mounts, bash,
   simple code with minimal comments, concise PRs, verified-only code reviews,
   branch + PR only, gitleaks scan before commit/push, no customer data or PII,
+  AGENTS.md + CLAUDE.md for repos missing agent docs,
   Conventional Commits).
 - `guardrails.json` holds deny/ask permission rules (secret files, `kubectl` secrets,
   `gh auth token`; configmaps and `kubectl config view` ask first). Deny rules apply in
