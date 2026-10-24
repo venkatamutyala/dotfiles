@@ -96,6 +96,20 @@ zsh -ic 'echo interactive-ok' 2>/dev/null | grep -qx interactive-ok \
 zsh -ic 'bindkey "^[[1;5C"' 2>/dev/null | grep -q forward-word \
   && pass "Ctrl+Right bound to forward-word (fast word navigation)" || fail "word-navigation keybinding not active"
 
+note "CLAUDE_CODE_OAUTH_TOKEN marks onboarding complete (non-interactive auth)"
+echo '{"foo": "bar"}' > "$HOME/.claude.json"
+CLAUDE_CODE_OAUTH_TOKEN=dummy zsh -ic true 2>/dev/null
+jq -e '.foo == "bar" and .hasCompletedOnboarding == true' "$HOME/.claude.json" >/dev/null \
+  && pass "existing ~/.claude.json merged with hasCompletedOnboarding" || fail "~/.claude.json not merged correctly"
+rm -f "$HOME/.claude.json"
+CLAUDE_CODE_OAUTH_TOKEN=dummy zsh -ic true 2>/dev/null
+jq -e '.hasCompletedOnboarding == true' "$HOME/.claude.json" >/dev/null \
+  && pass "missing ~/.claude.json created with hasCompletedOnboarding" || fail "~/.claude.json not created"
+echo '{"foo": "bar"}' > "$HOME/.claude.json"
+zsh -ic true 2>/dev/null
+jq -e '. == {"foo": "bar"}' "$HOME/.claude.json" >/dev/null \
+  && pass "without the token, ~/.claude.json is left untouched" || fail "~/.claude.json was modified without the token set"
+
 note "Claude Code integration (settings.json + claude wrapper)"
 grep -q 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS' "$HOME/.claude/settings.json" \
   && pass "~/.claude/settings.json enables agent teams" || fail "settings.json missing CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"

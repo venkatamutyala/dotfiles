@@ -134,6 +134,11 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   `claude --allow-dangerously-skip-permissions` (which *enables* the skip-permissions
   option for the session rather than auto-bypassing everything). It uses `whence -p` /
   `command claude` so it targets the real binary, not the function.
+- Also in `venkatamutyala-functions.zsh`, run at shell startup (not inside the `claude`
+  function): if `CLAUDE_CODE_OAUTH_TOKEN` is set (non-interactive auth, e.g.
+  CI/automation) and `jq` is available, mark onboarding complete in `~/.claude.json`
+  (merge the key in if the file exists, create it if not) so there's no first-run
+  onboarding prompt with no human to click through it.
 
 ## Choosing a version (install-from-tag)
 
