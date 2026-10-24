@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        debian: [bookworm, bullseye]
+        debian: [bookworm]
     steps:
       - uses: actions/checkout@v4
 

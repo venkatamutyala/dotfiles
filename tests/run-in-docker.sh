@@ -5,7 +5,6 @@
 #
 # Usage:
 #   tests/run-in-docker.sh            # debian:bookworm (tmux 3.3a)
-#   tests/run-in-docker.sh bullseye   # debian:bullseye (tmux 3.1c)
 
 set -euo pipefail
 
