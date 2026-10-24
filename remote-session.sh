@@ -2,15 +2,23 @@
 # Control-side companion to remote-access.sh. Run this on the machine Claude Code
 # itself operates from -- never on the remote target.
 #
-#   remote-session.sh new                 generate a session; prints the one-liner
-#                                          to run on the remote box
+#   remote-session.sh new                 generate a session; writes the one-liner
+#                                          to run on the remote box to a file and
+#                                          prints that file's path on stdout (not
+#                                          the command itself -- it contains real
+#                                          key material, so read the file directly
+#                                          rather than relaying it through an
+#                                          agent's own transcript/logs)
 #   remote-session.sh connect <id> [command...]
 #                                          connect to a session (tailcat's ssh service
 #                                          always runs as whoever invoked `serve` on
 #                                          the remote side -- there's no destination
 #                                          username to supply). With no command, opens
 #                                          an interactive shell; with one, runs it
-#                                          non-interactively and exits.
+#                                          non-interactively and exits. Gives up after
+#                                          $CONNECT_TIMEOUT seconds (tailcat's --allow
+#                                          silently hangs rather than erroring on a
+#                                          tunnel-layer mismatch).
 #
 # Session state lives under ~/.cache/remote-session/<id>/ and under tailcat's own
 # key store (~/.config/tailcat/keys/<id>*). Nothing here expires on its own --
@@ -21,6 +29,7 @@
 set -euo pipefail
 
 TAILCAT_VERSION=0.7.0
+CONNECT_TIMEOUT=20
 # Assumes this script and remote-access.sh have both landed on main and GitHub
 # Pages has redeployed; update if the Pages path ever changes.
 REMOTE_ACCESS_URL="https://setup.venkatamutyala.com/remote-access.sh"
@@ -58,16 +67,21 @@ ensure_tailcat() {
     *) die "unsupported architecture: $(uname -m)" ;;
   esac
 
-  local workdir base_url tarball expected actual
+  local workdir base_url tarball checksum_line hash_line expected actual
   workdir=$(mktemp -d)
   base_url="https://github.com/tailscale/tailcat/releases/download/v$TAILCAT_VERSION"
   tarball="tailcat_${TAILCAT_VERSION}_linux_${arch}.tar.gz"
 
   curl -fsSL -o "$workdir/checksums.txt" "$base_url/checksums.txt" || die "couldn't fetch checksums.txt"
   curl -fsSL -o "$workdir/$tarball" "$base_url/$tarball" || die "couldn't fetch $tarball"
-  expected=$(grep " $tarball\$" "$workdir/checksums.txt" | cut -d' ' -f1)
-  [ -n "$expected" ] || die "no checksum entry for $tarball"
-  actual=$(sha256sum "$workdir/$tarball" | cut -d' ' -f1)
+
+  # Each lookup below is kept out of a `cmd1 | cmd2` assignment on purpose: under
+  # `pipefail`, a failing first stage kills the script via `set -e` right there,
+  # before the die() message on the next line ever runs.
+  checksum_line=$(grep " $tarball\$" "$workdir/checksums.txt") || die "no checksum entry for $tarball in checksums.txt"
+  expected=$(cut -d' ' -f1 <<<"$checksum_line")
+  hash_line=$(sha256sum "$workdir/$tarball") || die "couldn't hash downloaded $tarball"
+  actual=$(cut -d' ' -f1 <<<"$hash_line")
   [ "$expected" = "$actual" ] || die "checksum mismatch for $tarball"
 
   tar -xzf "$workdir/$tarball" -C "$workdir" tailcat
@@ -80,34 +94,43 @@ cmd_new() {
   need base64
   ensure_tailcat
 
-  local id sess_dir server_key client_key
+  local id sess_dir client_key
   id="sess-$(date +%s)-$(mktemp -u XXXXXX)"
   sess_dir="$CACHE_DIR/$id"
   mkdir -p "$sess_dir"
-  server_key="$id"
   client_key="$id-client"
 
   ssh-keygen -q -t ed25519 -f "$sess_dir/id_ed25519" -N "" -C "remote-session:$id"
 
-  local address client_nodekey pubkey tailkey_b64
-  address=$("$TAILCAT_BIN" genkey --key="$server_key" --fixed-region 2>/dev/null | tail -n1)
-  client_nodekey=$("$TAILCAT_BIN" genkey --client --key="$client_key" 2>/dev/null | tail -n1)
+  local address_out address client_out client_nodekey pubkey tailkey_b64
+  address_out=$("$TAILCAT_BIN" genkey --key="$id" --fixed-region) || die "tailcat genkey (server) failed"
+  address=$(tail -n1 <<<"$address_out")
+  [ -n "$address" ] || die "tailcat genkey (server) produced no address"
+
+  client_out=$("$TAILCAT_BIN" genkey --client --key="$client_key") || die "tailcat genkey --client failed"
+  client_nodekey=$(tail -n1 <<<"$client_out")
+  [ -n "$client_nodekey" ] || die "tailcat genkey --client produced no node key"
+
   pubkey=$(cat "$sess_dir/id_ed25519.pub")
-  tailkey_b64=$(base64 -w0 "$TAILCAT_CONFIG_DIR/keys/$server_key.private.json")
+  tailkey_b64=$(base64 -w0 "$TAILCAT_CONFIG_DIR/keys/$id.private.json")
 
   {
-    echo "ADDRESS=$address"
-    echo "CLIENT_KEY=$client_key"
+    printf 'ADDRESS=%q\n' "$address"
+    printf 'CLIENT_KEY=%q\n' "$client_key"
   } >"$sess_dir/meta.env"
 
+  {
+    echo "curl -fsSL $REMOTE_ACCESS_URL \\"
+    echo "  | PUBKEY=\"$pubkey\" TAILKEY_B64=\"$tailkey_b64\" ALLOW=\"$client_nodekey\" sh"
+  } >"$sess_dir/remote-cmd.txt"
+  chmod 600 "$sess_dir/remote-cmd.txt"
+
   echo "Session: $id" >&2
-  echo >&2
-  echo "Run this on the remote box:" >&2
-  echo >&2
-  echo "curl -fsSL $REMOTE_ACCESS_URL \\"
-  echo "  | PUBKEY=\"$pubkey\" TAILKEY_B64=\"$tailkey_b64\" ALLOW=\"$client_nodekey\" sh"
-  echo >&2
+  echo "Command to run on the remote box is in the file below -- it contains real" >&2
+  echo "key material, so read it yourself (e.g. 'cat') and paste it onto the remote" >&2
+  echo "box directly, rather than relaying it through an agent's own transcript/logs:" >&2
   echo "Then: $0 connect $id" >&2
+  echo "$sess_dir/remote-cmd.txt"
 }
 
 cmd_connect() {
@@ -130,7 +153,7 @@ cmd_connect() {
   ssh-add "$sess_dir/id_ed25519" >/dev/null
 
   echo "==> connecting to session $id ($ADDRESS)" >&2
-  timeout 20 "$TAILCAT_BIN" --key="$CLIENT_KEY" ssh "$ADDRESS" "$@"
+  timeout "$CONNECT_TIMEOUT" "$TAILCAT_BIN" --key="$CLIENT_KEY" ssh "$ADDRESS" "$@"
 }
 
 case "${1:-}" in

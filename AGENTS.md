@@ -61,6 +61,16 @@ Settled; reviewers shouldn't re-raise these.
 - The secret scan is a Claude Code hook, not a native git hook.
 - Bash permission rules are prefix/pattern matches, not a security boundary; that
   limitation is accepted.
+- `remote-access.sh` and `remote-session.sh` deliberately duplicate the tailcat
+  fetch/checksum-verify logic rather than sharing it: `remote-access.sh` must stay a
+  single self-contained `curl | sh` payload for a box with nothing pre-installed, and
+  sourcing a shared snippet would add a second network fetch and a version-skew
+  problem to the one script that most needs to stay dependency-free.
+- `remote-session.sh` never auto-deletes a session's key material (`~/.cache/remote-session/<id>/`,
+  `~/.config/tailcat/keys/<id>*`) on completion. Deliberate: sessions are short-lived
+  and agent-driven, the control machine is a single-operator trusted box, and a
+  listing/expiry mechanism isn't worth the complexity for that threat model. Clean up
+  manually (see `remote-session.sh`'s header comment).
 - Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
   second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
   (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network
