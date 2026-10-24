@@ -9,9 +9,9 @@
 - **`tests/run-in-docker.sh [<debian-tag>]`** — convenience wrapper that runs
   the above in a throwaway `debian:<tag>` container, exactly like CI. Default
   `bookworm`.
-- **`tests/hooks-test.sh`** — feeds sample tool calls to the Claude guardrail hooks in
-  `claude/hooks/` and checks they block/allow correctly, including a real gitleaks run
-  against a throwaway repo. Runs on the host/runner (needs docker + jq).
+- **`tests/hooks-test.sh`** — feeds sample tool calls to the secret-scan hook
+  (`claude/hooks/gitleaks-guard.sh`) and checks it blocks/allows correctly, with real
+  gitleaks runs against throwaway repos. Runs on the host/runner (needs docker + jq).
 - **shellcheck** — CI runs `koalaman/shellcheck:v0.11.0 --severity=warning` on every
   tracked `*.sh` (zsh files aren't supported by shellcheck).
 - **`.github/workflows/ci.yml`** — runs the test on every `push` and `pull_request`,

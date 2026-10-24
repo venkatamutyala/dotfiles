@@ -13,15 +13,17 @@ disable-model-invocation: true
 3. **Stage.** Review `git status` and stage only files that belong to this change.
 4. **Check the diff** for customer data, PII, or tenant info. Replace with placeholders
    (`ACMECorp`, `foobar`, `user@example.com`) before continuing.
-5. **Scan staged changes.** Stop and report if it exits non-zero:
+5. **Secret scan.** The secret-scan hook runs on commit and push. If it blocks, stop and
+   report the file it names; don't open or print it. Under `--yolo` (no hook), scan by hand
+   and stop if it exits non-zero:
    ```bash
    docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --staged --redact
    ```
 6. **Commit** with a Conventional Commit message (`type(scope): summary`, `!` or a
    `BREAKING CHANGE:` footer for breaking changes). One logical change per commit.
-7. **Scan outgoing commits** (use the PR's base branch if it isn't `main`):
+7. **Scan outgoing commits** (only needed under `--yolo`; the hook does it otherwise):
    ```bash
-   docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --log-opts="origin/main..HEAD"
+   docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --log-opts="--branches --not --remotes"
    ```
 8. **Push** with `git push -u origin HEAD`. No force-push unless the user asked.
 9. **PR.** If none exists, `gh pr create` with a Conventional Commit title and a short

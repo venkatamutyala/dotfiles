@@ -21,7 +21,7 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
 | `claude/` → `~/.claude/` | Claude Code config tree: `settings.json`, global `CLAUDE.md`, `guardrails.json` (deny/ask rules + hooks, loaded only outside `--yolo`), `hooks/`, `agents/`, `skills/`, `statusline.sh`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
 | `tests/` | Docker integration test + local runner. |
-| `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the guardrail hook tests. |
+| `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the secret-scan hook test. |
 | `.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json` | release-please: on push to `main`, opens a release PR from Conventional Commits; merging it creates the `vX.Y.Z` tag the installer offers. |
 | `docs/` (`architecture.md`, `testing.md`) | Detailed agent docs, imported by `AGENTS.md`. |
 | `CLAUDE.md`, `CNAME`, `LICENSE`, `README.md` | Claude entry (imports `AGENTS.md`), Pages domain, license, human docs. |
@@ -49,7 +49,7 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 ```bash
 tests/run-in-docker.sh bookworm   # tmux 3.3a
 tests/run-in-docker.sh trixie     # tmux 3.5a
-tests/hooks-test.sh               # Claude guardrail hooks (needs docker + jq)
+tests/hooks-test.sh               # Claude secret-scan hook (needs docker + jq)
 ```
 
 Each must end with `ALL CHECKS PASSED` (`ALL HOOK CHECKS PASSED` for the hook test). Pushing also runs CI.
