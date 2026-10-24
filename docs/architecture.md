@@ -104,8 +104,14 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   directly related technologies, which can do the same (bounded by Claude Code's
   three-level subagent depth limit). All are `model: inherit` and
   barred from editing files (`disallowedTools`). `skills/review/` routes a
-  change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
-  use the team for reviews and feature builds.
+  change to the matching experts, then verifies findings.
+- The design team: `product-owner`, `ux-researcher`, `ux-expert`, `ux-engineer`, plus
+  `devtools-expert`, `infra-tools-expert`, and `dx-expert`, plus a generic `design-expert`
+  that `/design` names a role for (security architect, SRE, …) and that can pull in
+  related experts like `domain-expert` (same `inherit` / read-only setup). `skills/design/` consults them (and matching technology experts)
+  in parallel, presents one design, and waits for approval before implementing.
+  `CLAUDE.md` tells Claude to `/design` before feature builds and `/review` before
+  shipping.
 - `guardrails.json` also registers the `hooks/gitleaks-guard.sh` `PreToolUse` hook (so it
   follows the same "only outside `--yolo`" switch; `onFailure: block`). Before
   `git commit` it scans staged changes (plus unstaged and untracked files when the

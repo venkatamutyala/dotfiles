@@ -107,18 +107,20 @@ grep -q '^name: ship$' "$HOME/.claude/skills/ship/SKILL.md" \
   && pass "/ship skill installed (manual-only)" || fail "/ship skill missing or model-invocable"
 grep -q 'Never run anything that prints credentials' "$HOME/.claude/skills/review/SKILL.md" \
   && pass "/review passes the credentials safety rule to reviewers" || fail "/review is missing the credentials safety rule"
+grep -q 'wait for the user' "$HOME/.claude/skills/design/SKILL.md" \
+  && pass "/design stops for the user's go-ahead before implementing" || fail "/design is missing the approval checkpoint"
 grep -q '^name: review$' "$HOME/.claude/skills/review/SKILL.md" \
   && pass "/review skill installed" || fail "/review skill missing"
 for f in "$HOME"/.claude/agents/*.md; do
   n="$(basename "$f" .md)"
   grep -q "^name: $n$" "$f" && grep -q '^model: inherit$' "$f" && grep -q '^disallowedTools: Edit, Write, NotebookEdit$' "$f" \
     || fail "agent $n: name must match filename, model must be inherit, and editing must be disallowed"
-  grep -q "\`$n\`" "$HOME/.claude/skills/review/SKILL.md" \
-    || fail "agent $n is not referenced by the /review skill"
+  cat "$HOME/.claude/skills/review/SKILL.md" "$HOME/.claude/skills/design/SKILL.md" | grep -q "\`$n\`" \
+    || fail "agent $n is not referenced by the /review or /design skill"
   grep -q 'Never run commands that print credentials' "$f" \
     || fail "agent $n is missing the credentials safety rule"
 done
-pass "all $(ls "$HOME"/.claude/agents/*.md | wc -l) agents valid, inherit the session model, can't edit, carry the safety rule, and are routed by /review"
+pass "all $(ls "$HOME"/.claude/agents/*.md | wc -l) agents valid, inherit the session model, can't edit, carry the safety rule, and are routed by /review or /design"
 grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
   && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"
 # Stub the claude binary so we can test the wrapper without installing/running it.
