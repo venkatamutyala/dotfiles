@@ -102,7 +102,18 @@ sl="$(printf '{"model":{"display_name":"Opus"},"workspace":{"current_dir":"%s"},
 [ "$sl" = "Opus | ${REPO##*/} | ctx 42%" ] || [[ "$sl" == "Opus | ${REPO##*/} ("*") | ctx 42%" ]] \
   && pass "statusline.sh renders model | dir | ctx (got: $sl)" || fail "statusline.sh output wrong: $sl"
 grep -q '^name: ship$' "$HOME/.claude/skills/ship/SKILL.md" \
-  && pass "/ship skill installed" || fail "/ship skill missing"
+  && grep -q '^disable-model-invocation: true$' "$HOME/.claude/skills/ship/SKILL.md" \
+  && pass "/ship skill installed (manual-only)" || fail "/ship skill missing or model-invocable"
+grep -q '^name: review$' "$HOME/.claude/skills/review/SKILL.md" \
+  && pass "/review skill installed" || fail "/review skill missing"
+for f in "$HOME"/.claude/agents/*.md; do
+  n="$(basename "$f" .md)"
+  grep -q "^name: $n$" "$f" && grep -q '^model: inherit$' "$f" && grep -q '^disallowedTools: Edit, Write, NotebookEdit$' "$f" \
+    || fail "agent $n: name must match filename, model must be inherit, and editing must be disallowed"
+  grep -q "\`$n\`" "$HOME/.claude/skills/review/SKILL.md" \
+    || fail "agent $n is not referenced by the /review skill"
+done
+pass "all $(ls "$HOME"/.claude/agents/*.md | wc -l) agents valid, inherit the session model, can't edit, and are routed by /review"
 grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
   && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"
 # Stub the claude binary so we can test the wrapper without installing/running it.

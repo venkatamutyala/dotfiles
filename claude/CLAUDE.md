@@ -54,6 +54,17 @@ not in `~/.claude/` — the installer overwrites this file.
   Docker), and the standards or rules a new agent needs to contribute safely. Update it
   when those change.
 
+## Agent teams
+
+- Always work with a team of agents (defined in `~/.claude/agents/`) for both code
+  reviews and feature builds. Agents use the session's model.
+- **Reviews:** use the `/review` skill: core reviewers plus every domain expert the
+  change touches (routing table in `~/.claude/skills/review/SKILL.md`), then verify
+  each finding.
+- **Feature builds:** before implementing, send the plan to the matching experts in
+  parallel and fold in their feedback. After implementing, run `/review` before
+  shipping.
+
 ## Code reviews
 
 - Verify every finding before reporting it: read the surrounding code, trace the real

@@ -105,7 +105,8 @@ your local OS keyboard settings.
   and runs Claude's Bash tool under `/bin/bash` instead of your zsh login shell),
   a global `CLAUDE.md`, `guardrails.json` (deny/ask rules for secrets, loaded by the
   `claude` wrapper only when you *don't* pass `--yolo`), a status line
-  (`model | dir (branch) | ctx N%`, needs `jq`), and the `/ship` skill.
+  (`model | dir (branch) | ctx N%`, needs `jq`), the `/ship` skill, and a `/review` agent team (core reviewers + domain experts picked
+  by what the change touches, every finding verified).
   ⚠️ The installer **replaces** an existing
   `~/.claude/settings.json` / `~/.claude/CLAUDE.md` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
   first), so anything you've added there — permissions, MCP servers, hooks — moves to

@@ -2,7 +2,25 @@
 # relative to claude/). The installer fetches each via REPO_RAW, so directories
 # like skills/<name>/ must list every file. CI fails if this drifts from the tree.
 CLAUDE.md
+agents/ansible-expert.md
+agents/argocd-expert.md
+agents/correctness-reviewer.md
+agents/docker-expert.md
+agents/etcd-expert.md
+agents/github-actions-expert.md
+agents/golang-expert.md
+agents/helm-expert.md
+agents/kubernetes-expert.md
+agents/python-expert.md
+agents/security-reviewer.md
+agents/shell-expert.md
+agents/simplicity-reviewer.md
+agents/terraform-expert.md
+agents/tests-docs-reviewer.md
+agents/verifier.md
+agents/yaml-expert.md
 guardrails.json
 settings.json
+skills/review/SKILL.md
 skills/ship/SKILL.md
 statusline.sh
