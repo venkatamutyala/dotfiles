@@ -29,3 +29,17 @@ jobs:
         run: |
           docker run --rm -v "$PWD":/repo:ro "debian:${{ matrix.debian }}" \
             bash /repo/tests/integration-test.sh
+
+  lint-and-hooks:
+    name: shellcheck + guardrail hooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck (warnings and errors)
+        run: |
+          docker run --rm -v "$PWD":/mnt -w /mnt koalaman/shellcheck:v0.11.0 \
+            --severity=warning $(git ls-files '*.sh')
+
+      - name: Guardrail hooks (gitleaks runs in Docker)
+        run: tests/hooks-test.sh

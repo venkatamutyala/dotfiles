@@ -157,6 +157,7 @@ create_vm() {
     echo "Downloading fresh base image to ${DISK_PATH} and resizing..." >&2
     
     # Download the image fresh every time and resize it in place.
+    # shellcheck disable=SC2087  # expands locally on purpose (paths/URL/size)
     ssh -t -p "$REMOTE_PORT" -i "$KEYFILE_PATH" "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
         # Download directly to the final destination using wget
         echo 'Downloading image...' >&2
@@ -172,7 +173,8 @@ EOF
     fi
 
     # Create a minimal cloud-init configuration file
-    local CLOUD_INIT_TEMP_FILE=$(mktemp)
+    local CLOUD_INIT_TEMP_FILE
+    CLOUD_INIT_TEMP_FILE=$(mktemp)
     # Use a quoted heredoc ('EOF') here to prevent local expansion of `$`
     cat > "$CLOUD_INIT_TEMP_FILE" <<'EOF'
 #cloud-config
