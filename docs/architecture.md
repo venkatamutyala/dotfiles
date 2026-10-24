@@ -106,9 +106,11 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
 - `guardrails.json` also registers two `PreToolUse` hooks (so they follow the same
   "only outside `--yolo`" switch): `hooks/no-host-install.sh` blocks host installs
   (`apt`/`pip`/`npm -g`/`go install`/`curl | sh`, …) but allows them inside
-  `docker run`; `hooks/gitleaks-guard.sh` runs before `git commit`/`git push` and
-  pipes uncommitted changes, untracked files, and unpushed commits into gitleaks
-  (Docker, `stdin` mode, redacted), blocking on findings or if the scan can't run.
+  `docker run`; `hooks/gitleaks-guard.sh` runs before `git commit`/`git push` (following
+  `cd <dir>` and `git -C <dir>` to the target repo) and pipes staged and unstaged
+  changes, untracked files, and commits not on any remote into gitleaks (Docker,
+  digest-pinned, `--network none`, `stdin` mode, redacted). It blocks on findings, if
+  the scan can't run, or if it can't tell which repo the command targets.
   Both need `jq`.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
