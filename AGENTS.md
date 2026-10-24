@@ -22,6 +22,7 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `claude-settings.json` → `~/.claude/settings.json` | Claude Code settings; enables `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`. |
 | `tests/` | Docker integration test + local runner. |
 | `.github/workflows/ci.yml` | CI: runs the integration test on push/PR across debian bookworm + bullseye. |
+| `.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json` | release-please: on push to `main`, opens a release PR from Conventional Commits; merging it creates the `vX.Y.Z` tag the installer offers. |
 | `docs/` (`architecture.md`, `testing.md`) | Detailed agent docs, imported by `AGENTS.md`. |
 | `CLAUDE.md`, `CNAME`, `LICENSE`, `README.md` | Claude entry (imports `AGENTS.md`), Pages domain, license, human docs. |
 
