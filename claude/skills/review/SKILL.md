@@ -27,7 +27,8 @@ description: Review a change with a team of agents: core reviewers plus the doma
    | `python-expert` | `*.py`, Python packaging |
 
    For any other technology the change uses, add a `domain-expert` and name the
-   technology in its prompt (e.g. "You are a cert-manager expert").
+   technology in its prompt (e.g. "You are a cert-manager expert"). Tell it which
+   experts are already running, so the related experts it pulls in aren't duplicates.
 3. **Review in parallel.** Launch all chosen agents in one message. Give each the diff
    (or file list), the repo's AGENTS.md if present, and these rules:
    - Report only issues that realistic usage would hit, each with `file:line`, the
