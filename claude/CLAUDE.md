@@ -33,6 +33,19 @@ not in `~/.claude/` — the installer overwrites this file.
 - Run independent jobs in parallel (e.g. a test matrix across images) rather than
   one after another.
 
+## Code reviews
+
+- Verify every finding before reporting it: read the surrounding code, trace the real
+  call path, and reproduce it (in Docker) when practical. Drop anything you couldn't
+  confirm rather than reporting it as "possible".
+- Focus on issues that realistic inputs and normal usage would actually hit. Skip
+  speculative or very rare scenarios.
+- If an edge case is still worth knowing about, put it in a separate section
+  labeled **Edge cases (FYI)** after the main findings, with one line on how likely
+  it is. Don't recommend fixing it unless it's cheap and clearly worthwhile.
+- Every main finding should state the concrete scenario that triggers it and why it
+  matters. Don't pad the review; if nothing real turns up, say so.
+
 ## Commits
 
 - Use Conventional Commits: `type(scope): summary`, e.g. `feat(installer): …`,
