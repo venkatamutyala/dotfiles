@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/venkatamutyala/dotfiles/compare/v0.2.0...v0.3.0) (2026-10-24)
+
+
+### Features
+
+* **claude:** OpenTofu expert and long-running command rules ([#15](https://github.com/venkatamutyala/dotfiles/issues/15)) ([51e300d](https://github.com/venkatamutyala/dotfiles/commit/51e300dd430766e63c876c22f3fcc209ba053cd5))
+
 ## [0.2.0](https://github.com/venkatamutyala/dotfiles/compare/v0.1.0...v0.2.0) (2026-10-24)
 
 
