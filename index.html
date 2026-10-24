@@ -127,7 +127,7 @@ backup_one() {                     # copy (not move) existing target into timest
 }
 backup_existing() {
   log "Backing up any existing files to ${BACKUP_DIR}"
-  for f in ~/.tmux.conf ~/.vimrc ~/.config/htop/htoprc ~/.zshrc \
+  for f in ~/.tmux.conf ~/.tmux-cheatsheet.txt ~/.vimrc ~/.config/htop/htoprc ~/.zshrc \
            ~/.oh-my-zsh/custom/vm-manage.sh ~/.oh-my-zsh/custom/venkatamutyala-functions.zsh; do
     backup_one "$f"
   done
@@ -188,6 +188,7 @@ fetch_configs() {
   chmod +x ~/.oh-my-zsh/custom/vm-manage.sh
   fetch "${REPO_RAW}/venkatamutyala-functions.zsh" ~/.oh-my-zsh/custom/venkatamutyala-functions.zsh
   fetch "${REPO_RAW}/tmux.conf"                     ~/.tmux.conf
+  fetch "${REPO_RAW}/tmux-cheatsheet.txt"           ~/.tmux-cheatsheet.txt
   fetch "${REPO_RAW}/htoprc"                        ~/.config/htop/htoprc
   fetch "${REPO_RAW}/vimrc"                         ~/.vimrc
   fetch "https://raw.githubusercontent.com/junegunn/vim-plug/${VIM_PLUG_REF}/plug.vim" ~/.vim/autoload/plug.vim

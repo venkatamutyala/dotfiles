@@ -1,0 +1,39 @@
+tmux cheat sheet                                          prefix = Ctrl-b
+
+SESSIONS / WINDOWS
+  prefix $          rename session
+  prefix ,          rename window
+  prefix c          new window
+  prefix &          kill window (confirms)
+  prefix n / p      next / previous window
+  Shift-Left/Right  next / previous window      (no prefix)
+  prefix 0-9        jump to window N
+  prefix d          detach session
+
+PANES
+  prefix v          split left/right
+  prefix s          split top/bottom
+  prefix x          kill pane (confirms)
+  prefix z          zoom/unzoom pane
+  prefix o          cycle to next pane
+  prefix { / }      swap pane with previous/next
+
+PANE NAVIGATION
+  Alt + h/j/k/l             move to pane left/down/up/right   (no prefix)
+  Alt + Left/Down/Up/Right  same, arrow keys                  (no prefix)
+  prefix h/j/k/l            move to pane left/down/up/right
+
+PANE RESIZE (needs prefix each time)
+  prefix H/J/K/L            resize by 5 cells: left/down/up/right
+  prefix Alt+h/j/k/l        resize by 1 cell:  left/down/up/right
+
+COPY MODE (vi-style)
+  prefix [          enter copy mode
+  v                 begin selection    (while in copy mode)
+  y                 copy selection, exit, send to LOCAL clipboard (OSC52)
+  mouse drag        select + copy automatically
+  double/triple-click   copy word / line
+
+MISC
+  prefix r          reload ~/.tmux.conf
+  prefix ?          show this cheat sheet

@@ -66,6 +66,8 @@ clip="$(tmux -L citest show -g set-clipboard 2>/dev/null | awk '{print $2}')"
 [ "$clip" = on ] && pass "set-clipboard on (OSC52 clipboard enabled)" || fail "set-clipboard is '$clip', expected 'on'"
 tmux -L citest list-keys -T copy-mode-vi 2>/dev/null | grep -q 'MouseDragEnd1Pane' \
   && pass "mouse drag copy binding present" || fail "MouseDragEnd1Pane copy binding missing"
+tmux -L citest list-keys -T prefix 2>/dev/null | grep -q "display-popup.*tmux-cheatsheet.txt" \
+  && pass "prefix + ? opens the cheat sheet popup" || fail "cheat sheet keybinding missing"
 tmux -L citest kill-server 2>/dev/null || true
 
 note "Run the installer against the LOCAL checkout (REPO_RAW=file://$REPO)"
@@ -80,6 +82,7 @@ for p in zsh-syntax-highlighting zsh-autosuggestions you-should-use; do
 done
 grep -q 'set-clipboard on' "$HOME/.tmux.conf" \
   && pass "installed ~/.tmux.conf carries the copy/paste fix" || fail "installed ~/.tmux.conf missing the fix"
+[ -f "$HOME/.tmux-cheatsheet.txt" ] && pass "~/.tmux-cheatsheet.txt installed" || fail "~/.tmux-cheatsheet.txt missing"
 [ -x "$HOME/.oh-my-zsh/custom/vm-manage.sh" ] && pass "vm-manage.sh installed and executable" || fail "vm-manage.sh missing/not executable"
 for vp in gruvbox NERDTree fzf; do
   [ -d "$HOME/.vim/plugged/$vp" ] && pass "vim plugin installed: $vp" || fail "vim plugin missing: $vp (PlugInstall failed)"
