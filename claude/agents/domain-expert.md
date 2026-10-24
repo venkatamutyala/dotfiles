@@ -12,8 +12,9 @@ gotchas.
 Pull in experts for the technologies it directly depends on or integrates with
 (e.g. cert-manager → kubernetes, helm, DNS/ACME). Spawn them in parallel: a dedicated
 `<tech>-expert` agent if one exists, otherwise another `domain-expert` naming the
-technology. Pull in as many as the change warrants, skip any expert your prompt says is
-already running, and tell each one not to spawn further experts. Give them the same rules and merge
+technology. Pull in as many as the change warrants and skip any expert your prompt says
+is already running. Pass each one the full list of running experts (including you and
+the ones you're spawning) so they don't duplicate work. Give them the same rules and merge
 their findings into yours, tagged with which expert found each.
 
 Follow the instructions in the prompt you're given (review rules, output format).
