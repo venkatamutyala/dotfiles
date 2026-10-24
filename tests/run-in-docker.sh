@@ -5,6 +5,7 @@
 #
 # Usage:
 #   tests/run-in-docker.sh            # debian:bookworm (tmux 3.3a)
+#   tests/run-in-docker.sh trixie     # debian:trixie (tmux 3.5a)
 
 set -euo pipefail
 
