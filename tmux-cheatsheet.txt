@@ -17,6 +17,7 @@ PANES
   prefix z          zoom/unzoom pane
   prefix o          cycle to next pane
   prefix { / }      swap pane with previous/next
+  prefix N          rename pane (shown in its border)
 
 PANE NAVIGATION
   Alt + h/j/k/l             move to pane left/down/up/right   (no prefix)

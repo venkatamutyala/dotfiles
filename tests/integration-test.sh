@@ -68,6 +68,10 @@ tmux -L citest list-keys -T copy-mode-vi 2>/dev/null | grep -q 'MouseDragEnd1Pan
   && pass "mouse drag copy binding present" || fail "MouseDragEnd1Pane copy binding missing"
 tmux -L citest list-keys -T prefix 2>/dev/null | grep -q "display-popup.*tmux-cheatsheet.txt" \
   && pass "prefix + ? opens the cheat sheet popup" || fail "cheat sheet keybinding missing"
+tmux -L citest list-keys -T prefix 2>/dev/null | grep -q "select-pane -T" \
+  && pass "prefix + N renames the current pane" || fail "pane-rename keybinding missing"
+pbs="$(tmux -L citest show -g pane-border-status 2>/dev/null | awk '{print $2}')"
+[ "$pbs" = top ] && pass "pane-border-status on (pane titles visible)" || fail "pane-border-status is '$pbs', expected 'top'"
 tmux -L citest kill-server 2>/dev/null || true
 
 note "Run the installer against the LOCAL checkout (REPO_RAW=file://$REPO)"
