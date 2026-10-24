@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/venkatamutyala/dotfiles/compare/v0.1.0...v0.2.0) (2026-10-24)
+
+
+### Features
+
+* **claude:** add a /design agent team for feature design ([#14](https://github.com/venkatamutyala/dotfiles/issues/14)) ([3607128](https://github.com/venkatamutyala/dotfiles/commit/360712881747f3f92c866987b3fea542c41056cc))
+* **claude:** harden /review with safety rules, pinned refs, and a Decisions list ([#12](https://github.com/venkatamutyala/dotfiles/issues/12)) ([f8d9f69](https://github.com/venkatamutyala/dotfiles/commit/f8d9f6933c5caea9860030c17f2ed71380ae3f88))
+
 ## [0.1.0](https://github.com/venkatamutyala/dotfiles/compare/v0.0.1...v0.1.0) (2026-10-24)
 
 
