@@ -16,6 +16,7 @@ agents/golang-expert.md
 agents/helm-expert.md
 agents/infra-tools-expert.md
 agents/kubernetes-expert.md
+agents/opentofu-expert.md
 agents/product-owner.md
 agents/python-expert.md
 agents/security-architect.md
@@ -23,7 +24,6 @@ agents/security-reviewer.md
 agents/shell-expert.md
 agents/simplicity-reviewer.md
 agents/sre-expert.md
-agents/terraform-expert.md
 agents/tests-docs-reviewer.md
 agents/ux-engineer.md
 agents/ux-expert.md
