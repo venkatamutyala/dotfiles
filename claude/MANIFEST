@@ -6,6 +6,7 @@ agents/ansible-expert.md
 agents/argocd-expert.md
 agents/correctness-reviewer.md
 agents/docker-expert.md
+agents/domain-expert.md
 agents/etcd-expert.md
 agents/github-actions-expert.md
 agents/golang-expert.md

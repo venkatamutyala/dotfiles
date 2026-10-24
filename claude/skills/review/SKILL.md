@@ -26,8 +26,8 @@ description: Review a change with a team of agents: core reviewers plus the doma
    | `terraform-expert` | `*.tf`, `*.tfvars` |
    | `python-expert` | `*.py`, Python packaging |
 
-   If no listed expert fits a technology the change uses, add a general-purpose agent
-   briefed as an expert in it.
+   For any other technology the change uses, add a `domain-expert` and name the
+   technology in its prompt (e.g. "You are a cert-manager expert").
 3. **Review in parallel.** Launch all chosen agents in one message. Give each the diff
    (or file list), the repo's AGENTS.md if present, and these rules:
    - Report only issues that realistic usage would hit, each with `file:line`, the
