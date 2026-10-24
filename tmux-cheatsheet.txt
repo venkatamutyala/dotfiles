@@ -15,7 +15,7 @@ PANES
   prefix s          split top/bottom
   prefix x          kill pane (confirms)
   prefix z          zoom/unzoom pane
-  prefix o          cycle to next pane
+  prefix o          cycle to next pane (keep tapping o, no prefix needed again)
   prefix { / }      swap pane with previous/next
   prefix N          rename pane (shown in its border)
 
