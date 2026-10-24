@@ -112,7 +112,7 @@ your local OS keyboard settings.
   the backup. Re-merge what you need.
 - **`claude` wrapper** (in `venkatamutyala-functions.zsh`):
   - If Claude Code isn't installed, the first `claude` run installs a **pinned
-    version** via `curl -fsSL https://claude.ai/install.sh | bash -s -- "${CLAUDE_VERSION:-2.1.133}"`
+    version** via `curl -fsSL https://claude.ai/install.sh | bash -s -- "${CLAUDE_VERSION:-2.1.310}"`
     (override with `CLAUDE_VERSION=latest`).
   - `claude --yolo` is shorthand for `claude --allow-dangerously-skip-permissions`,
     which *enables* the skip-permissions option for the session (you can turn it on)
