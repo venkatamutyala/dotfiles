@@ -12,6 +12,7 @@ not in `~/.claude/` — the installer overwrites this file.
 - Prefer official, version-pinned images (`python:3.12-slim`, not `python:latest`).
 - My CI and GitHub Actions pipelines always run in Docker images, so local runs
   should use the same images and commands CI uses.
+- Infrastructure as code: OpenTofu (`tofu`), never Terraform.
 - Bind mounts: the Docker daemon may run on the host (e.g. from a devcontainer), so a
   `-v` path must exist on the host too. If a mount comes up empty or fails, put the
   files under `/workspaces/glueops` and mount from there, never from `/tmp` or the
@@ -22,6 +23,19 @@ not in `~/.claude/` — the installer overwrites this file.
 - The Bash tool runs bash (`CLAUDE_CODE_SHELL=/bin/bash`), even though my login shell
   is zsh. Write bash syntax; zsh-only functions and aliases from `~/.zshrc` are not
   available there.
+
+## Long-running commands and waits
+
+Don't burn time on a command that's silently broken.
+
+- Before looping on a command (polling CI, a deploy, a PR), run it once and check its
+  output is what you expect.
+- Loops stop on the first error instead of retrying it; never hide the polled
+  command's errors with `2>/dev/null`.
+- Every wait is bounded (`timeout`, or a max number of attempts) and prints a status
+  line at least every 60 seconds. Run waits with the Monitor tool so each line
+  surfaces as it happens.
+- After starting anything in the background, check its output within the first minute.
 
 ## Isolate and parallelize
 
