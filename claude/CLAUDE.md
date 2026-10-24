@@ -61,9 +61,9 @@ not in `~/.claude/` — the installer overwrites this file.
 - **Reviews:** use the `/review` skill: core reviewers plus every domain expert the
   change touches (routing table in `~/.claude/skills/review/SKILL.md`), then verify
   each finding.
-- **Feature builds:** before implementing, send the plan to the matching experts in
-  parallel and fold in their feedback. After implementing, run `/review` before
-  shipping.
+- **Feature builds:** before implementing, send the plan to the matching experts (or a
+  `domain-expert` for technologies without one) in parallel and fold in their
+  feedback. After implementing, run `/review` before shipping.
 
 ## Code reviews
 

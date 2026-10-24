@@ -96,7 +96,8 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   open/update a PR Manual-only (`disable-model-invocation`), since it has side effects.
 - `agents/` holds the review/build team: core reviewers, a `verifier`, and domain
   experts (yaml, kubernetes, helm, argocd, etcd, ansible, golang, docker, shell,
-  github-actions, terraform, python), all `model: inherit` and
+  github-actions, terraform, python), plus a generic `domain-expert` that `/review` names
+  a technology for when there's no dedicated expert. All are `model: inherit` and
   barred from editing files (`disallowedTools`). `skills/review/` routes a
   change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
   use the team for reviews and feature builds.
