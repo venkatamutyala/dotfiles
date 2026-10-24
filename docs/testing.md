@@ -10,7 +10,7 @@
   the above in a throwaway `debian:<tag>` container, exactly like CI. Default
   `bookworm`.
 - **`.github/workflows/ci.yml`** — runs the test on every `push` and `pull_request`,
-  in `debian:bookworm` (tmux 3.3a).
+  in a matrix across `debian:bookworm` (tmux 3.3a) and `debian:trixie` (tmux 3.5a).
 
 ## How the test installs the checked-out code
 
@@ -46,9 +46,10 @@ test validates the code in the current commit/branch.
 
 ```bash
 tests/run-in-docker.sh            # debian:bookworm
+tests/run-in-docker.sh trixie     # debian:trixie
 ```
 
-It must finish with `ALL CHECKS PASSED`. The script is `set -euo pipefail`, so the
+Both must finish with `ALL CHECKS PASSED`. The script is `set -euo pipefail`, so the
 first failed assertion aborts the run.
 
 ## Extending the test
@@ -61,5 +62,5 @@ Add assertions with the `pass "msg"` / `fail "msg"` helpers, e.g.:
   && pass "..." || fail "..."
 ```
 
-When you add a config or feature, add a matching assertion and re-run the Docker test
-before shipping.
+When you add a config or feature, add a matching assertion and re-run both Debian
+versions before shipping.
