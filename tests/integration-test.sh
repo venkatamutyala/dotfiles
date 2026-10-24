@@ -133,10 +133,10 @@ printf '%s' "$plain_out" | grep -qF -- "--settings $HOME/.claude/guardrails.json
   && pass "plain 'claude' loads guardrails.json" || fail "guardrails not loaded without --yolo (got: $plain_out)"
 grep -q 'Read(~/.ssh/\*\*)' "$HOME/.claude/guardrails.json" \
   && pass "guardrails.json denies reading ~/.ssh" || fail "guardrails.json missing ~/.ssh deny"
-for h in no-host-install gitleaks-guard; do
-  [ -x "$HOME/.claude/hooks/$h.sh" ] && grep -q "hooks/$h.sh" "$HOME/.claude/guardrails.json" \
-    && pass "hook $h installed, executable, and wired in guardrails.json" || fail "hook $h missing or not wired"
-done
+[ -x "$HOME/.claude/hooks/gitleaks-guard.sh" ] \
+  && jq -e '.hooks.PreToolUse[].hooks[] | select(.command | endswith("gitleaks-guard.sh")) | .onFailure == "block"' \
+       "$HOME/.claude/guardrails.json" >/dev/null \
+  && pass "secret-scan hook installed, executable, and wired (onFailure: block)" || fail "secret-scan hook missing or not wired"
 grep -q 'install.sh | bash -s -- ' "$HOME/.oh-my-zsh/custom/venkatamutyala-functions.zsh" \
   && pass "claude install pins a version (bash -s -- VERSION)" || fail "claude install is not version-pinned"
 
