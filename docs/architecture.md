@@ -83,6 +83,11 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   global `CLAUDE.md` (Docker-only workflow, `/workspaces/glueops` bind mounts, bash,
   simple code with minimal comments, concise PRs, verified-only code reviews,
   Conventional Commits).
+- `guardrails.json` holds deny/ask permission rules (secret files, `kubectl` secrets,
+  `gh auth token`; configmaps and `kubectl config view` ask first). Deny rules apply in
+  every mode, so it is *not* merged into `settings.json`: the `claude` wrapper passes
+  `--settings ~/.claude/guardrails.json` only when `--yolo` isn't given. Sessions not
+  started via the wrapper (VS Code, `command claude`) don't get them.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.

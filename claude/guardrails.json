@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(kubectl get secret *)",
+      "Bash(kubectl get secrets *)",
+      "Bash(kubectl describe secret *)",
+      "Bash(kubectl describe secrets *)",
+      "Bash(gh auth token *)",
+      "Bash(gh auth status --show-token *)",
+      "Read(~/.ssh/**)",
+      "Read(~/.kube/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.git-credentials)",
+      "Read(~/.netrc)",
+      "Read(~/.claude/.credentials.json)",
+      "Read(**/.env)",
+      "Read(**/.env.*)"
+    ],
+    "ask": [
+      "Bash(kubectl get configmap *)",
+      "Bash(kubectl get configmaps *)",
+      "Bash(kubectl get cm *)",
+      "Bash(kubectl describe configmap *)",
+      "Bash(kubectl describe configmaps *)",
+      "Bash(kubectl describe cm *)",
+      "Bash(kubectl config view *)"
+    ]
+  }
+}

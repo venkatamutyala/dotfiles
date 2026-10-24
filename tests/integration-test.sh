@@ -108,6 +108,13 @@ printf '%s' "$yolo_out" | grep -q -- '--allow-dangerously-skip-permissions' \
   && pass "'claude --yolo' maps to --allow-dangerously-skip-permissions" || fail "--yolo not translated (got: $yolo_out)"
 printf '%s' "$yolo_out" | grep -q -- '--yolo' \
   && fail "--yolo leaked through to the claude binary" || pass "--yolo is not passed through literally"
+printf '%s' "$yolo_out" | grep -q -- '--settings' \
+  && fail "--yolo session still loads guardrails" || pass "--yolo skips guardrails.json"
+plain_out="$(zsh -ic 'claude -p hi' 2>/dev/null)"
+printf '%s' "$plain_out" | grep -qF -- "--settings $HOME/.claude/guardrails.json -p hi" \
+  && pass "plain 'claude' loads guardrails.json" || fail "guardrails not loaded without --yolo (got: $plain_out)"
+grep -q 'Read(~/.ssh/\*\*)' "$HOME/.claude/guardrails.json" \
+  && pass "guardrails.json denies reading ~/.ssh" || fail "guardrails.json missing ~/.ssh deny"
 grep -q 'install.sh | bash -s -- ' "$HOME/.oh-my-zsh/custom/venkatamutyala-functions.zsh" \
   && pass "claude install pins a version (bash -s -- VERSION)" || fail "claude install is not version-pinned"
 

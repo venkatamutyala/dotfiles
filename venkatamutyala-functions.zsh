@@ -33,6 +33,7 @@ fi
 #   * `claude --yolo` -> `claude --allow-dangerously-skip-permissions`, which
 #     *enables* the skip-permissions option for the session (you can turn it on)
 #     rather than auto-bypassing everything like --dangerously-skip-permissions.
+#   * Without --yolo, loads ~/.claude/guardrails.json (deny/ask rules for secrets).
 # `command claude` / `whence -p` target the real binary, not this function.
 claude() {
   if ! whence -p claude >/dev/null 2>&1; then
@@ -54,10 +55,19 @@ claude() {
   # Translate the --yolo alias into the real bypass-permissions flag.
   # NB: don't name this array `argv` -- in zsh that's an alias for $@.
   local -a cargs
-  local a
+  local a yolo=""
   for a in "$@"; do
-    [[ "$a" == "--yolo" ]] && cargs+=(--allow-dangerously-skip-permissions) || cargs+=("$a")
+    if [[ "$a" == "--yolo" ]]; then
+      yolo=1; cargs+=(--allow-dangerously-skip-permissions)
+    else
+      cargs+=("$a")
+    fi
   done
+
+  # Deny/ask rules apply in every mode, so load them only outside --yolo.
+  if [[ -z "$yolo" && -f ~/.claude/guardrails.json ]]; then
+    cargs=(--settings ~/.claude/guardrails.json "${cargs[@]}")
+  fi
 
   command claude "${cargs[@]}"
 }
