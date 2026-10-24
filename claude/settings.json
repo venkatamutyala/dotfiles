@@ -4,5 +4,9 @@
     "CLAUDE_CODE_SHELL": "/bin/bash"
   },
   "theme": "dark",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  }
 }

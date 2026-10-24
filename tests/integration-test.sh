@@ -27,9 +27,9 @@ note() { printf '\n\033[1;34m== %s ==\033[0m\n' "$*"; }
 pass() { printf '  \033[32mPASS\033[0m %s\n' "$*"; }
 fail() { printf '  \033[31mFAIL\033[0m %s\n' "$*" >&2; exit 1; }
 
-note "Install prerequisites (zsh git curl tmux vim)"
+note "Install prerequisites (zsh git curl tmux vim jq)"
 apt-get update -qq
-apt-get install -y -qq zsh git curl ca-certificates tmux vim >/dev/null
+apt-get install -y -qq zsh git curl ca-certificates tmux vim jq >/dev/null
 printf 'using: '; zsh --version; printf 'using: '; tmux -V
 
 note "Static checks on index.html (the browser/curl polyglot)"
@@ -97,6 +97,12 @@ while IFS= read -r rel; do
 done < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$REPO/claude/MANIFEST" | grep -v '^$')
 grep -q '"CLAUDE_CODE_SHELL": "/bin/bash"' "$HOME/.claude/settings.json" \
   && pass "settings.json pins Claude's Bash tool to /bin/bash" || fail "settings.json missing CLAUDE_CODE_SHELL=/bin/bash"
+sl="$(printf '{"model":{"display_name":"Opus"},"workspace":{"current_dir":"%s"},"context_window":{"used_percentage":42.7}}' "$REPO" \
+  | "$HOME/.claude/statusline.sh")"
+[ "$sl" = "Opus | ${REPO##*/} | ctx 42%" ] || [[ "$sl" == "Opus | ${REPO##*/} ("*") | ctx 42%" ]] \
+  && pass "statusline.sh renders model | dir | ctx (got: $sl)" || fail "statusline.sh output wrong: $sl"
+grep -q '^name: ship$' "$HOME/.claude/skills/ship/SKILL.md" \
+  && pass "/ship skill installed" || fail "/ship skill missing"
 grep -q 'Conventional Commits' "$HOME/.claude/CLAUDE.md" \
   && pass "global ~/.claude/CLAUDE.md installed" || fail "global ~/.claude/CLAUDE.md missing"
 # Stub the claude binary so we can test the wrapper without installing/running it.
