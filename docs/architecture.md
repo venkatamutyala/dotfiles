@@ -140,7 +140,7 @@ available as of **2026-05-07** (reproducible, supply-chain-safe installs):
   against a pinned SHA** (`*_SHA`) — a moved/tampered upstream tag aborts the install.
 - **vim plugins**: pinned per-plugin commit SHAs via vim-plug `{ 'commit': '…' }` in vimrc.
 - **Claude Code**: the `claude` wrapper installs a pinned version (`CLAUDE_VERSION`,
-  default `2.1.133`); override with `CLAUDE_VERSION=latest`.
+  default `2.1.310`, pinned 2026-10-24); override with `CLAUDE_VERSION=latest`.
 
 To bump: edit the `*_REF` vars in index.html, the `{ 'commit': … }` values in vimrc, and
 `CLAUDE_VERSION` in venkatamutyala-functions.zsh. The integration test asserts the OMZ
