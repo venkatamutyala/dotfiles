@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/venkatamutyala/dotfiles/compare/v0.3.0...v0.4.0) (2026-10-24)
+
+
+### Features
+
+* **tmux:** add a curated cheat sheet popup on prefix + ? ([#18](https://github.com/venkatamutyala/dotfiles/issues/18)) ([5db41a0](https://github.com/venkatamutyala/dotfiles/commit/5db41a02fe923539f59d8ce8e68ced94645fe5cf))
+* **tmux:** show session name in status-left ([#17](https://github.com/venkatamutyala/dotfiles/issues/17)) ([44d4bea](https://github.com/venkatamutyala/dotfiles/commit/44d4bea488b30257eb7df9a7473a1e70f0e5ebcd))
+* **zsh:** mark Claude Code onboarding complete when running non-interactively ([#19](https://github.com/venkatamutyala/dotfiles/issues/19)) ([d567344](https://github.com/venkatamutyala/dotfiles/commit/d56734400d0f8ec36d534988c1cc0b4f0f39a6ac))
+
 ## [0.3.0](https://github.com/venkatamutyala/dotfiles/compare/v0.2.0...v0.3.0) (2026-10-24)
 
 
