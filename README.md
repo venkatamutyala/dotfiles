@@ -106,8 +106,10 @@ your local OS keyboard settings.
   a global `CLAUDE.md`, `guardrails.json` (deny/ask rules for secrets plus a hook that
   secret-scans before commit/push, loaded by the `claude` wrapper only
   when you *don't* pass `--yolo`), a status line
-  (`model | dir (branch) | ctx N%`, needs `jq`), the `/ship` skill, and a `/review` agent team (core reviewers + domain experts picked
-  by what the change touches, every finding verified).
+  (`model | dir (branch) | ctx N%`, needs `jq`), the `/ship` skill, a `/review` agent team (core reviewers + domain experts picked
+  by what the change touches, every finding verified), and a `/design` team (product
+  owner, UX researcher/expert/engineer, developer-tools/infrastructure/DX experts, SRE, security architect)
+  that proposes a design and waits for your go-ahead before building.
   ⚠️ The installer **replaces** an existing
   `~/.claude/settings.json` / `~/.claude/CLAUDE.md` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
   first), so anything you've added there — permissions, MCP servers, hooks — moves to

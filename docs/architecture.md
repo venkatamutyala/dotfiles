@@ -99,13 +99,21 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   open/update a PR Manual-only (`disable-model-invocation`), since it has side effects.
 - `agents/` holds the review/build team: core reviewers, a `verifier`, and domain
   experts (yaml, kubernetes, helm, argocd, etcd, ansible, golang, docker, shell,
-  github-actions, terraform, python), plus a generic `domain-expert` that `/review` names
+  github-actions, terraform, python, sre), plus a generic `domain-expert` that `/review` names
   a technology for when there's no dedicated expert; it pulls in as many experts as needed for
   directly related technologies, which can do the same (bounded by Claude Code's
   three-level subagent depth limit). All are `model: inherit` and
-  barred from editing files (`disallowedTools`). `skills/review/` routes a
-  change to the matching experts, then verifies findings. `CLAUDE.md` tells Claude to
-  use the team for reviews and feature builds.
+  have the edit tools disallowed (`disallowedTools`); beyond that they're read-only by instruction. `skills/review/` routes a
+  change to the matching experts, then verifies findings.
+- The design team: `product-owner`, `ux-researcher`, `ux-expert`, `ux-engineer`, plus
+  `devtools-expert`, `infra-tools-expert`, and `dx-expert`, `sre-expert`, `security-architect` (threat modeling at design time; `sre-expert` also
+  reviews production-facing changes), plus a generic `design-expert`
+  that `/design` names a role for (accessibility, technical writer, …) and that can pull
+  in related experts like `domain-expert` (same `inherit`, edit tools disallowed).
+  `skills/design/` consults them (and matching technology experts) in parallel,
+  presents one design, and waits for approval before implementing.
+  `CLAUDE.md` tells Claude to `/design` before feature builds and `/review` before
+  shipping.
 - `guardrails.json` also registers the `hooks/gitleaks-guard.sh` `PreToolUse` hook (so it
   follows the same "only outside `--yolo`" switch; `onFailure: block`). Before
   `git commit` it scans staged changes (plus unstaged and untracked files when the
