@@ -42,12 +42,15 @@ not in `~/.claude/` — the installer overwrites this file.
 
 ## Commands for me to run
 
-- When you want me to run something myself — not you running it via your own
-  Bash tool, something I need to paste into a terminal, like the tailcat
-  one-liner — write it to a file instead of printing it in chat. Give me the
-  path both in your reply and as real terminal output (e.g. `echo "$path"`
-  via your Bash tool), so I can select-and-copy it straight out of the
-  terminal pane, not just out of the chat text.
+- Short, simple commands — a handful of words, nothing sensitive — just say
+  them inline like normal. Don't wrap a trivial command in a file just to
+  follow this rule.
+- Longer, multi-line, or secret-bearing commands I need to paste into a
+  terminal myself (not you running it via your own Bash tool — like the
+  tailcat one-liner) — write it to a file instead of printing it in chat.
+  Give me the path both in your reply and as real terminal output (e.g.
+  `echo "$path"` via your Bash tool), so I can select-and-copy it straight
+  out of the terminal pane, not just out of the chat text.
 - Put these under `~/.cache/claude-cmds/` with a short descriptive filename.
   Nothing here auto-expires, same as the tailcat session files below — I'll
   clean it up myself whenever.
