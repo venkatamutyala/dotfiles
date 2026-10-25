@@ -147,7 +147,10 @@ not in `~/.claude/` — the installer overwrites this file.
   reviews and feature builds. Agents use the session's model.
 - **Reviews:** use the `/review` skill: core reviewers plus every domain expert the
   change touches (routing table in `~/.claude/skills/review/SKILL.md`), then verify
-  each finding.
+  each finding. Every change gets this before it ships — before `git push`/opening a
+  PR — no exception for something that looks small, quick, or obviously correct.
+  If you genuinely think a specific change doesn't need it, say so and ask me first;
+  don't just decide on your own and skip it silently.
 - **Feature builds** (anything non-trivial): start with the `/design` skill: the product/UX team, plus the
   developer-tools/infrastructure/DX team and matching technology experts where they
   apply. Show me the design and wait for my go-ahead before implementing. After
