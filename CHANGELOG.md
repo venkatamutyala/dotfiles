@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/venkatamutyala/dotfiles/compare/v0.5.0...v0.6.0) (2026-10-25)
+
+
+### Features
+
+* **zsh:** add dotfiles-update alias to re-run the installer ([#26](https://github.com/venkatamutyala/dotfiles/issues/26)) ([ef15ea2](https://github.com/venkatamutyala/dotfiles/commit/ef15ea2690568f00779672cf5b9ceadd6bd09ba4))
+
 ## [0.5.0](https://github.com/venkatamutyala/dotfiles/compare/v0.4.0...v0.5.0) (2026-10-25)
 
 
