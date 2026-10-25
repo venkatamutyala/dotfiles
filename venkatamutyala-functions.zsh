@@ -85,6 +85,15 @@ claude() {
 }
 
 
+# --- Dotfiles ----------------------------------------------------------------
+# Re-runs the installer (safe/idempotent -- backs up anything it'd overwrite).
+# Interactive: prompts you to pick a version. Non-interactive / scripted: pass
+# a tag, e.g. `dotfiles-update v1.2.3`.
+dotfiles-update() {
+  curl setup.venkatamutyala.com | zsh -s -- "$@"
+}
+
+
 vm() {
     # Set the absolute path to your script
     local script_path="$HOME/.oh-my-zsh/custom/vm-manage.sh"
