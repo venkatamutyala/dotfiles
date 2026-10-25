@@ -20,6 +20,8 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `htoprc` → `~/.config/htop/htoprc` | htop layout. |
 | `venkatamutyala-functions.zsh` → `~/.oh-my-zsh/custom/` | zsh functions (`vm`, `gha-ls`, `gha-trigger`, `debug-pod`, `dev-start`, `sshpass`, `claude`) + line-editor keybindings. Auto-sourced by Oh-My-Zsh. |
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
+| `remote-access.sh` | Standalone, not installed by `index.html`. Served at setup.venkatamutyala.com/remote-access.sh; run via `curl … \| sh` **on a third-party remote box** (NAT'd/outbound-only, nothing pre-installed) to open an ephemeral, key-only SSH session over [tailcat](https://github.com/tailscale/tailcat) — no `sshd`, no package manager, no root required. |
+| `remote-session.sh` | Standalone, not installed by `index.html`. Control-side companion to `remote-access.sh`, run directly (`./remote-session.sh`) on the machine Claude Code operates from: `new` generates the session key material and the one-liner for the remote box; `connect` connects to it. Primary consumer is an agent, not a human typing commands. |
 | `claude/` → `~/.claude/` | Claude Code config tree: `settings.json`, global `CLAUDE.md`, `guardrails.json` (deny/ask rules + hooks, loaded only outside `--yolo`), `hooks/`, `agents/`, `skills/`, `statusline.sh`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
 | `tests/` | Docker integration test + local runner. |
 | `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the secret-scan hook test. |
@@ -59,6 +61,16 @@ Settled; reviewers shouldn't re-raise these.
 - The secret scan is a Claude Code hook, not a native git hook.
 - Bash permission rules are prefix/pattern matches, not a security boundary; that
   limitation is accepted.
+- `remote-access.sh` and `remote-session.sh` deliberately duplicate the tailcat
+  fetch/checksum-verify logic rather than sharing it: `remote-access.sh` must stay a
+  single self-contained `curl | sh` payload for a box with nothing pre-installed, and
+  sourcing a shared snippet would add a second network fetch and a version-skew
+  problem to the one script that most needs to stay dependency-free.
+- `remote-session.sh` never auto-deletes a session's key material (`~/.cache/remote-session/<id>/`,
+  `~/.config/tailcat/keys/<id>*`) on completion. Deliberate: sessions are short-lived
+  and agent-driven, the control machine is a single-operator trusted box, and a
+  listing/expiry mechanism isn't worth the complexity for that threat model. Clean up
+  manually (see `remote-session.sh`'s header comment).
 - Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
   second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
   (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network

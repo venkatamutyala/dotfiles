@@ -44,3 +44,6 @@ jobs:
 
       - name: Guardrail hooks (gitleaks runs in Docker)
         run: tests/hooks-test.sh
+
+      - name: remote-session.sh logic (stubbed tailcat, no real network)
+        run: tests/remote-session-test.sh

@@ -12,6 +12,15 @@
 - **`tests/hooks-test.sh`** — feeds sample tool calls to the secret-scan hook
   (`claude/hooks/gitleaks-guard.sh`) and checks it blocks/allows correctly, with real
   gitleaks runs against throwaway repos. Runs on the host/runner (needs docker + jq).
+- **`tests/remote-session-test.sh`** — exercises `remote-session.sh`'s own logic
+  (error messages on a failed/empty `tailcat genkey`, the `remote-cmd.txt` file's
+  permissions and stdout-only-has-a-path contract, an address containing a space
+  round-tripping safely through `meta.env`, and that `connect` cleans up its
+  `ssh-agent` on both success and failure) against a stubbed `tailcat` binary and a
+  hermetic `$HOME` — no real network or tailscale infra involved. Runs on the
+  host/runner (needs bash + openssh-client). Neither `remote-access.sh` (which runs
+  on a third-party remote box, not this repo's own test infra) nor
+  `remote-session.sh` are wired into `tests/integration-test.sh`.
 - **shellcheck** — CI runs `koalaman/shellcheck:v0.11.0 --severity=warning` on every
   tracked `*.sh` (zsh files aren't supported by shellcheck).
 - **`.github/workflows/ci.yml`** — runs the test on every `push` and `pull_request`,
