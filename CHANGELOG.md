@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/venkatamutyala/dotfiles/compare/v0.4.0...v0.5.0) (2026-10-25)
+
+
+### Features
+
+* add remote-access.sh and remote-session.sh for ad hoc tailcat SSH ([#22](https://github.com/venkatamutyala/dotfiles/issues/22)) ([8b38e3e](https://github.com/venkatamutyala/dotfiles/commit/8b38e3ef36c69254336217d907ee5954201c1157))
+
 ## [0.4.0](https://github.com/venkatamutyala/dotfiles/compare/v0.3.0...v0.4.0) (2026-10-24)
 
 
