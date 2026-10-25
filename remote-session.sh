@@ -15,10 +15,14 @@
 #                                          the remote side -- there's no destination
 #                                          username to supply). With no command, opens
 #                                          an interactive shell; with one, runs it
-#                                          non-interactively and exits. Gives up after
-#                                          $CONNECT_TIMEOUT seconds (tailcat's --allow
-#                                          silently hangs rather than erroring on a
-#                                          tunnel-layer mismatch).
+#                                          non-interactively and exits. First does a
+#                                          bounded ($PING_TIMEOUT seconds) reachability
+#                                          check -- tailcat's --allow silently hangs
+#                                          rather than erroring on a tunnel-layer
+#                                          mismatch, so this fails fast and clearly
+#                                          instead -- then runs the command itself
+#                                          with no artificial cap, exactly as long as
+#                                          it actually takes.
 #
 # Session state lives under ~/.cache/remote-session/<id>/ and under tailcat's own
 # key store (~/.config/tailcat/keys/<id>*). Nothing here expires on its own --
@@ -29,7 +33,7 @@
 set -euo pipefail
 
 TAILCAT_VERSION=0.7.0
-CONNECT_TIMEOUT=20
+PING_TIMEOUT=10
 # Assumes this script and remote-access.sh have both landed on main and GitHub
 # Pages has redeployed; update if the Pages path ever changes.
 REMOTE_ACCESS_URL="https://setup.venkatamutyala.com/remote-access.sh"
@@ -152,8 +156,13 @@ cmd_connect() {
   trap 'kill "$SSH_AGENT_PID" >/dev/null 2>&1 || true' EXIT
   ssh-add "$sess_dir/id_ed25519" >/dev/null
 
+  echo "==> checking session $id is reachable..." >&2
+  if ! timeout "$PING_TIMEOUT" "$TAILCAT_BIN" --key="$CLIENT_KEY" ping --timeout="${PING_TIMEOUT}s" "$ADDRESS" >/dev/null 2>&1; then
+    die "session $id isn't reachable after ${PING_TIMEOUT}s -- either the remote command isn't running yet, or its --allow doesn't match this client; confirm it's up, then retry"
+  fi
+
   echo "==> connecting to session $id ($ADDRESS)" >&2
-  timeout "$CONNECT_TIMEOUT" "$TAILCAT_BIN" --key="$CLIENT_KEY" ssh "$ADDRESS" "$@"
+  "$TAILCAT_BIN" --key="$CLIENT_KEY" ssh "$ADDRESS" "$@"
 }
 
 case "${1:-}" in

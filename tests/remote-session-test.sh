@@ -24,8 +24,9 @@ mkdir -p "$bin_dir"
 
 # Stub tailcat: `genkey [--client] --key=<name>` prints an address/nodekey (or fails
 # or prints nothing, per env vars) and writes a dummy server key file to the same
-# path remote-session.sh itself reads; anything else (`--key=<x> ssh <addr> [cmd]`)
-# just exits with $FAKE_SSH_EXIT, recording its argv for inspection.
+# path remote-session.sh itself reads. `--key=<x> ping ...` exits with $FAKE_PING_EXIT
+# (default success). `--key=<x> ssh <addr> [cmd]` exits with $FAKE_SSH_EXIT, recording
+# its argv for inspection.
 cat >"$bin_dir/tailcat" <<'STUB'
 #!/bin/sh
 if [ "$1" = "genkey" ]; then
@@ -53,6 +54,13 @@ if [ "$1" = "genkey" ]; then
     echo "${FAKE_ADDRESS:-tcpFAKEADDRESS}"
   fi
 else
+  is_ping=0
+  for a in "$@"; do
+    [ "$a" = "ping" ] && is_ping=1
+  done
+  if [ "$is_ping" = "1" ]; then
+    exit "${FAKE_PING_EXIT:-0}"
+  fi
   [ -n "${FAKE_RECORD_ARGS_TO:-}" ] && printf '%s\n' "$@" >"$FAKE_RECORD_ARGS_TO"
   exit "${FAKE_SSH_EXIT:-0}"
 fi
@@ -96,6 +104,20 @@ source "$sess_dir/meta.env"
   || fail "address corrupted: got [$ADDRESS], want [$addr_with_space]"
 [ ! -e "$HOME/should-not-exist" ] && pass "no code executed while sourcing meta.env" \
   || fail "SECURITY: sourcing meta.env executed injected command"
+
+echo "== connect: unreachable session (ping fails) is a clear die(), never attempts ssh, still cleans up ssh-agent"
+record="$HOME/ssh-args"
+rm -f "$record"
+before=$(agent_count)
+FAKE_PING_EXIT=1 FAKE_RECORD_ARGS_TO="$record" "$script" connect "$sess_id" >/dev/null 2>"$HOME/err" && fail "expected nonzero exit" || true
+grep -q 'ERROR:.*not reachable\|ERROR:.*isn.t reachable' "$HOME/err" && pass "clear die() message: $(cat "$HOME/err")" \
+  || fail "no clear die() message: $(cat "$HOME/err")"
+[ ! -f "$record" ] && pass "ssh was never attempted after a failed reachability check" \
+  || fail "ssh ran anyway despite the ping failure: $(cat "$record")"
+sleep 0.2
+after=$(agent_count)
+[ "$after" -le "$before" ] && pass "ssh-agent count did not increase after an unreachable session ($before -> $after)" \
+  || fail "ssh-agent leaked after a ping failure ($before -> $after)"
 
 echo "== connect: successful session cleans up the ssh-agent it started"
 before=$(agent_count)
