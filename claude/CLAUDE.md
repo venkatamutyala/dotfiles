@@ -40,6 +40,18 @@ not in `~/.claude/` — the installer overwrites this file.
   longer waits). If I ask for status while something's running, read its log and
   summarize it instead of just saying "still running."
 
+## Commands for me to run
+
+- When you want me to run something myself — not you running it via your own
+  Bash tool, something I need to paste into a terminal, like the tailcat
+  one-liner — write it to a file instead of printing it in chat. Give me the
+  path both in your reply and as real terminal output (e.g. `echo "$path"`
+  via your Bash tool), so I can select-and-copy it straight out of the
+  terminal pane, not just out of the chat text.
+- Put these under `~/.cache/claude-cmds/` with a short descriptive filename.
+  Nothing here auto-expires, same as the tailcat session files below — I'll
+  clean it up myself whenever.
+
 ## Remote access (tailcat)
 
 - When asked to open a new connection to a remote/third-party Linux box via
