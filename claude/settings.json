@@ -13,7 +13,8 @@
   "permissions": {
     "allow": [
       "Read(~/.agent-memory/**)",
-      "Edit(~/.agent-memory/**)"
+      "Edit(~/.agent-memory/memory/**)",
+      "Edit(~/.agent-memory/projects/**)"
     ]
   },
   "hooks": {
@@ -23,7 +24,7 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/agent-memory-sync.sh start",
-            "timeout": 30
+            "timeout": 60
           }
         ]
       }
@@ -33,8 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/agent-memory-sync.sh push",
-            "async": true
+            "command": "~/.claude/hooks/agent-memory-sync.sh push"
           }
         ]
       }

@@ -116,8 +116,8 @@ your local OS keyboard settings.
   the backup. Re-merge what you need.
 - **Memory:** Claude's auto memory and per-repo notes live in a private,
   agent-agnostic repo
-  (`venkatamutyala/agent-memory`) cloned to `~/.agent-memory`. Hooks pull it at
-  session start and commit, gitleaks-scan, and push it after each turn, so every
+  (`venkatamutyala/agent-memory`) cloned to `~/.agent-memory`. Hooks sync it at
+  session start and after each turn (commit, pull, gitleaks-scan, push), so every
   machine shares one memory. Needs `gh` (signed in), `jq`, and Docker for the scan. If
   memory from another machine doesn't show up, run
   `~/.claude/hooks/agent-memory-sync.sh status`. To use your own repo, set

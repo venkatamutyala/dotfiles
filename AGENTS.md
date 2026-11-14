@@ -71,15 +71,19 @@ Settled; reviewers shouldn't re-raise these.
   and agent-driven, the control machine is a single-operator trusted box, and a
   listing/expiry mechanism isn't worth the complexity for that threat model. Clean up
   manually (see `remote-session.sh`'s header comment).
-- Agent memory lives in a private, agent-agnostic repo (`venkatamutyala/agent-memory`, cloned to
-  `~/.agent-memory`), synced straight to its `main` by `hooks/agent-memory-sync.sh`.
-  Real customer and repo names are allowed there; secrets are not, so the hook runs
-  gitleaks itself before every push and holds the push if the scan finds something or
-  can't run (no Docker = no push). It is wired in `settings.json`, not
-  `guardrails.json`, so it also runs under `--yolo`. It never blocks a session;
-  failures surface as a warning at the next session start. All repos share one
-  `MEMORY.md` (the filename Claude Code requires); per-repo notes go in
-  `projects/<owner>/<repo>.md`. The repo's own `AGENTS.md` holds its layout and rules.
+- Agent memory lives in a private, agent-agnostic repo (`venkatamutyala/agent-memory`)
+  and syncs straight to its `main` after every turn. Real customer and repo names are
+  allowed there; secrets are not, so `hooks/agent-memory-sync.sh` runs gitleaks itself
+  before every push and holds the push if the scan finds something or can't run (no
+  Docker = no push). It is wired in `settings.json`, so it also runs under `--yolo`,
+  and it never blocks a session. Claude may edit only `memory/` and `projects/` there
+  without a prompt. Markdown conflicts keep both sides (`*.md merge=union`) rather
+  than stopping the sync.
+- Accepted memory-sync edge cases: notes are looked up by `owner/repo` only, so a repo
+  on another host with the same path gets the same notes, and GitLab subgroups / Azure
+  DevOps paths can collide; two first-ever sessions racing on a new machine can print
+  a wrong "gh auth login" hint once; a file written during a pull can pick up merge
+  markers if the same non-markdown file changed upstream.
 - Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
   second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
   (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network

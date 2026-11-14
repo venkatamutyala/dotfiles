@@ -22,12 +22,15 @@
   on a third-party remote box, not this repo's own test infra) nor
   `remote-session.sh` are wired into `tests/integration-test.sh`.
 - **`tests/memory-sync-test.sh`** — exercises `claude/hooks/agent-memory-sync.sh`
-  against a local bare remote with two clones standing in for two machines, a stubbed
-  `docker` (no real gitleaks run), and a hermetic `$HOME`: clone-if-missing, push and
-  pull, `MEMORY.md` union merge, per-repo notes, a push held by a gitleaks finding or a
-  scan that can't run, a rebase conflict, the detached push, and that it always exits
-  0. Also asserts its gitleaks pin matches `gitleaks-guard.sh`. Runs on the host/runner
-  (needs bash + git + jq).
+  against a local bare remote with two clones standing in for two machines, stubbed
+  `gh` and `docker` (no network, no real gitleaks run), and a hermetic `$HOME`: the
+  `gh` clone, push and pull (including a pull with nothing to push), what the scanner
+  is fed (every unpushed commit, content hidden by `.gitattributes` or a binary byte),
+  a push held by a finding, a failed scan, or missing Docker, the lock, markdown union
+  merges, a non-markdown conflict, a manual rebase left alone, per-repo notes (size
+  cap, symlinks, `..`), the detached push running in its own session, `status`, and
+  that it always exits 0. Also asserts its gitleaks pin matches `gitleaks-guard.sh`.
+  Runs on the host/runner (needs bash + git + jq + util-linux).
 - **shellcheck** — CI runs `koalaman/shellcheck:v0.11.0 --severity=warning` on every
   tracked `*.sh` (zsh files aren't supported by shellcheck).
 - **`.github/workflows/ci.yml`** — runs the test on every `push` and `pull_request`,
@@ -64,7 +67,7 @@ test validates the code in the current commit/branch.
   (which pass the same rule to their agents); `claude --yolo`
   maps to `--allow-dangerously-skip-permissions` and skips `guardrails.json`, while
   plain `claude` loads it; the memory sync hook is executable and wired in
-  `settings.json`; the claude install is version-pinned.
+  `settings.json` with edit access limited to `memory/` and `projects/`; the claude install is version-pinned.
 - **Idempotency:** a second run leaves `~/.zshrc` byte-identical with one `plugins=(`
   line.
 - **Backups:** a `~/.dotfiles-backup-*` directory is created.
