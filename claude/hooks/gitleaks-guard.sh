@@ -55,19 +55,20 @@ for t in "${!scan[@]}"; do
   command -v docker >/dev/null 2>&1 || { echo "Blocked: the secret scan needs docker." >&2; exit 2; }
 
   # Added lines only, keeping "+++ <file>" headers so findings can be traced to a file.
+  # --text and grep -a so .gitattributes or a stray binary byte can't hide content.
   stream=$(mktemp); err=$(mktemp); chmod 600 "$stream" "$err"
   ( cd "$t" || exit
     if [[ "$kinds" == *staged* ]]; then
-      git diff --no-color --cached
+      git diff --no-color --text --no-ext-diff --no-textconv --cached
       if [[ "$kinds" == *all* || "$kinds" == *add* ]]; then
-        git diff --no-color
+        git diff --no-color --text --no-ext-diff --no-textconv
         git ls-files --others --exclude-standard -z | xargs -0 -r -n1 sh -c 'echo "+++ b/$1"; sed "s/^/+/" -- "$1"' _
       fi
     fi
     if [[ "$kinds" == *push* && -n "$(git remote)" ]]; then
-      git log -p --no-color --branches --not --remotes
+      git log -p --no-color --text --no-ext-diff --no-textconv --branches --not --remotes
     fi
-  ) | grep '^+' > "$stream"
+  ) | LC_ALL=C grep -a '^+' > "$stream"
 
   report=$(docker run --rm -i --network none "$GITLEAKS_IMAGE" stdin --redact --no-banner \
              --log-level error --report-format json --report-path - < "$stream" 2>"$err")
