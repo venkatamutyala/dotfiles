@@ -123,6 +123,20 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   (digest-pinned, `--network none`, `stdin` mode, redacted), and names the file in its
   block message. It blocks on findings, if the scan can't run, or if it can't tell which
   repo the command targets. Needs `jq`.
+- `hooks/claude-memory-sync.sh` keeps `~/.claude-memory` (a clone of the private
+  `venkatamutyala/claude-memory` repo; override with `CLAUDE_MEMORY_REPO`) in step with
+  its remote. `settings.json` points `autoMemoryDirectory` at its `memory/` folder,
+  allows reads/edits under `~/.claude-memory/`, and wires three hooks:
+  `SessionStart` runs `start` (clone via `gh` if missing, commit, `pull --rebase
+  --autostash`, then print `projects/<owner>/<repo>.md` for the current repo; its stdout
+  goes into Claude's context), and `Stop`/`SessionEnd` run `push` (detached: commit,
+  gitleaks scan of the unpushed commits with the same pinned image as
+  `gitleaks-guard.sh`, push). Every path exits 0. A failed commit/pull/push, a held
+  push, or a rebase conflict (aborted; commits stay local) is written to
+  `.git/claude-sync-failed` and printed as a `[claude-memory] WARNING` by the next
+  `start`; `claude-memory-sync.sh status` shows the same by hand. A `mkdir` lock stops
+  two syncs overlapping. The memory repo's `.gitattributes` sets `MEMORY.md merge=union`
+  so index lines added on two machines both survive.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.

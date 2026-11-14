@@ -169,6 +169,15 @@ not in `~/.claude/` — the installer overwrites this file.
 - Every main finding should state the concrete scenario that triggers it and why it
   matters. Don't pad the review; if nothing real turns up, say so.
 
+## Memory
+
+- Auto memory lives in `~/.claude-memory/memory/`, part of my private memory repo.
+  Hooks commit, pull, and push it; never run git in `~/.claude-memory` yourself.
+- `memory/` and its `MEMORY.md` index are for knowledge that spans repos. Anything
+  specific to one repo goes in `~/.claude-memory/projects/<owner>/<repo>.md` (create it
+  when needed; the session-start hook prints it), never in `MEMORY.md`.
+- If session start prints a `[claude-memory] WARNING`, tell me before doing anything else.
+
 ## Git and GitHub
 
 - Never push to `main`/`master`; work on a branch (e.g. `feat/<short-desc>`) and open
@@ -190,6 +199,8 @@ not in `~/.claude/` — the installer overwrites this file.
 - Never commit or push customer data, PII, or tenant information (real company names,
   people, emails, domains, cluster/tenant IDs, IPs). Use placeholders such as
   `ACMECorp`, `foobar`, `user@example.com`, `example.com`.
+  The one exception is my private memory repo (`~/.claude-memory`): real customer and
+  repo names are fine there. Secrets are not.
 - Never print, log, or commit secrets. If one shows up in output, stop and tell me.
 - Ask before anything destructive or hard to undo: deleting resources, dropping data,
   changing DNS.
