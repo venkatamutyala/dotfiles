@@ -171,12 +171,13 @@ not in `~/.claude/` — the installer overwrites this file.
 
 ## Memory
 
-- Auto memory lives in `~/.claude-memory/memory/`, part of my private memory repo.
-  Hooks commit, pull, and push it; never run git in `~/.claude-memory` yourself.
+- Auto memory lives in `~/.agent-memory/memory/`, part of my private memory repo.
+  Hooks commit, pull, and push it; never run git in `~/.agent-memory` yourself.
 - `memory/` and its `MEMORY.md` index are for knowledge that spans repos. Anything
-  specific to one repo goes in `~/.claude-memory/projects/<owner>/<repo>.md` (create it
+  specific to one repo goes in `~/.agent-memory/projects/<owner>/<repo>.md` (create it
   when needed; the session-start hook prints it), never in `MEMORY.md`.
-- If session start prints a `[claude-memory] WARNING`, tell me before doing anything else.
+- The repo's layout and rules are in `~/.agent-memory/AGENTS.md`.
+- If session start prints a `[agent-memory] WARNING`, tell me before doing anything else.
 
 ## Git and GitHub
 
@@ -199,7 +200,7 @@ not in `~/.claude/` — the installer overwrites this file.
 - Never commit or push customer data, PII, or tenant information (real company names,
   people, emails, domains, cluster/tenant IDs, IPs). Use placeholders such as
   `ACMECorp`, `foobar`, `user@example.com`, `example.com`.
-  The one exception is my private memory repo (`~/.claude-memory`): real customer and
+  The one exception is my private memory repo (`~/.agent-memory`): real customer and
   repo names are fine there. Secrets are not.
 - Never print, log, or commit secrets. If one shows up in output, stop and tell me.
 - Ask before anything destructive or hard to undo: deleting resources, dropping data,

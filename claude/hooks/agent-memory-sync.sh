@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Keeps ~/.claude-memory (Claude's auto memory + per-repo notes) in step with its
+# Keeps ~/.agent-memory (Claude's auto memory + per-repo notes) in step with its
 # private Git remote. Wired in settings.json:
 #   start   SessionStart: clone if missing, commit, pull --rebase, print this repo's notes
 #   push    Stop / SessionEnd: commit, secret-scan, push (detached, returns at once)
@@ -8,11 +8,11 @@
 # printed by the next `start`, whose stdout goes into Claude's context.
 GITLEAKS_IMAGE="ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
 
-MEM="${CLAUDE_MEMORY_DIR:-$HOME/.claude-memory}"
-REPO="${CLAUDE_MEMORY_REPO:-venkatamutyala/claude-memory}"
-LOCK="$MEM/.git/claude-sync.lock"
-FAIL="$MEM/.git/claude-sync-failed"
-LOG="$MEM/.git/claude-sync.log"
+MEM="${AGENT_MEMORY_DIR:-$HOME/.agent-memory}"
+REPO="${AGENT_MEMORY_REPO:-venkatamutyala/agent-memory}"
+LOCK="$MEM/.git/agent-sync.lock"
+FAIL="$MEM/.git/agent-sync-failed"
+LOG="$MEM/.git/agent-sync.log"
 
 export GIT_TERMINAL_PROMPT=0
 export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh} -o BatchMode=yes -o ConnectTimeout=10"
@@ -47,8 +47,8 @@ ensure_clone() {
     fi
     find "$MEM" -depth -type d -empty -delete 2>/dev/null
   fi
-  if [ -n "${CLAUDE_MEMORY_REMOTE:-}" ]; then
-    git clone -q "$CLAUDE_MEMORY_REMOTE" "$MEM" 2>/dev/null && return 0
+  if [ -n "${AGENT_MEMORY_REMOTE:-}" ]; then
+    git clone -q "$AGENT_MEMORY_REMOTE" "$MEM" 2>/dev/null && return 0
   elif command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     gh repo clone "$REPO" "$MEM" -- -q 2>/dev/null && return 0
   fi
@@ -123,7 +123,7 @@ cmd_start() {
   local cwd why ahead slug notes
   cwd=$(session_cwd)
   if ! why=$(ensure_clone); then
-    echo "[claude-memory] WARNING: memory is not syncing: $why"
+    echo "[agent-memory] WARNING: memory is not syncing: $why"
     return 0
   fi
   if take_lock; then
@@ -132,9 +132,9 @@ cmd_start() {
 
   ahead=$(unpushed)
   if [ -s "$FAIL" ]; then
-    echo "[claude-memory] WARNING: memory sync is behind (${ahead:-0} unpushed commit(s)). Tell the user."
-    echo "[claude-memory] Last error: $(cat "$FAIL")"
-    echo "[claude-memory] To inspect: gh auth status; ~/.claude/hooks/claude-memory-sync.sh status"
+    echo "[agent-memory] WARNING: memory sync is behind (${ahead:-0} unpushed commit(s)). Tell the user."
+    echo "[agent-memory] Last error: $(cat "$FAIL")"
+    echo "[agent-memory] To inspect: gh auth status; ~/.claude/hooks/agent-memory-sync.sh status"
   fi
   # Retry anything an earlier session left unpushed.
   [ "${ahead:-0}" -gt 0 ] && ( "$0" push-now </dev/null >/dev/null 2>&1 & )
@@ -143,10 +143,10 @@ cmd_start() {
   case "$slug" in ''|*..*) return 0 ;; esac
   notes="$MEM/projects/$slug.md"
   if [ -s "$notes" ]; then
-    echo "[claude-memory] Private notes for $slug ($notes):"
+    echo "[agent-memory] Private notes for $slug ($notes):"
     cat "$notes"
   else
-    echo "[claude-memory] No private notes yet for $slug. Notes specific to this repo go in $notes, not in memory/."
+    echo "[agent-memory] No private notes yet for $slug. Notes specific to this repo go in $notes, not in memory/."
   fi
 }
 
@@ -174,6 +174,6 @@ case "${1:-}" in
   push)     ( "$0" push-now </dev/null >/dev/null 2>&1 & ) ;;
   push-now) cmd_push_now ;;
   status)   cmd_status ;;
-  *)        echo "usage: claude-memory-sync.sh {start|push|status}" ;;
+  *)        echo "usage: agent-memory-sync.sh {start|push|status}" ;;
 esac
 exit 0

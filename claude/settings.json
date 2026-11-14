@@ -9,11 +9,11 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "autoMemoryDirectory": "~/.claude-memory/memory",
+  "autoMemoryDirectory": "~/.agent-memory/memory",
   "permissions": {
     "allow": [
-      "Read(~/.claude-memory/**)",
-      "Edit(~/.claude-memory/**)"
+      "Read(~/.agent-memory/**)",
+      "Edit(~/.agent-memory/**)"
     ]
   },
   "hooks": {
@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/claude-memory-sync.sh start",
+            "command": "~/.claude/hooks/agent-memory-sync.sh start",
             "timeout": 30
           }
         ]
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/claude-memory-sync.sh push",
+            "command": "~/.claude/hooks/agent-memory-sync.sh push",
             "async": true
           }
         ]
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/claude-memory-sync.sh push"
+            "command": "~/.claude/hooks/agent-memory-sync.sh push"
           }
         ]
       }

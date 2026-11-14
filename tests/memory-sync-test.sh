@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Tests claude/hooks/claude-memory-sync.sh against a local bare remote, two clones
+# Tests claude/hooks/agent-memory-sync.sh against a local bare remote, two clones
 # standing in for two machines, a stubbed `docker` (so no real gitleaks run), and a
 # hermetic $HOME. Needs bash, git, jq. Runs on the host / CI runner, same tier as
 # tests/remote-session-test.sh.
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-script="$root/claude/hooks/claude-memory-sync.sh"
+script="$root/claude/hooks/agent-memory-sync.sh"
 pass() { printf '  \033[32mPASS\033[0m %s\n' "$*"; }
 fail() { printf '  \033[31mFAIL\033[0m %s\n' "$*" >&2; exit 1; }
 
@@ -43,9 +43,9 @@ git -C "$seed" add -A
 git -C "$seed" commit -q -m seed
 git -C "$seed" push -q origin HEAD:main
 
-export CLAUDE_MEMORY_REMOTE="$remote"
+export AGENT_MEMORY_REMOTE="$remote"
 A="$HOME/a"; B="$HOME/b"
-on() { local dir="$1"; shift; CLAUDE_MEMORY_DIR="$dir" "$script" "$@"; }
+on() { local dir="$1"; shift; AGENT_MEMORY_DIR="$dir" "$script" "$@"; }
 start() { printf '{"cwd":"%s"}' "${2:-$HOME}" | on "$1" start; }
 remote_has() { git -C "$remote" show "main:$1" >/dev/null 2>&1; }
 
@@ -63,7 +63,7 @@ out="$(start "$HOME/c")"
   && pass "non-empty dir left alone, with a warning" || fail "unexpected: $out"
 
 echo "== start: warns (and still exits 0) when it can't clone"
-out="$(printf '{}' | CLAUDE_MEMORY_REMOTE="$HOME/nope.git" CLAUDE_MEMORY_DIR="$HOME/d" "$script" start)" \
+out="$(printf '{}' | AGENT_MEMORY_REMOTE="$HOME/nope.git" AGENT_MEMORY_DIR="$HOME/d" "$script" start)" \
   || fail "start exited nonzero"
 grep -q 'WARNING: memory is not syncing' <<<"$out" && pass "warning printed" || fail "unexpected: $out"
 
@@ -107,10 +107,10 @@ out="$(FAKE_GITLEAKS_EXIT=1 start "$A")"
 grep -q 'WARNING' <<<"$out" && grep -q 'push held: gitleaks found a secret.*memory/leak.md' <<<"$out" \
   && pass "next start warns and names the file" || fail "unexpected: $out"
 FAKE_GITLEAKS_EXIT=125 on "$A" push-now
-grep -q 'push held: the secret scan failed to run' "$A/.git/claude-sync-failed" \
+grep -q 'push held: the secret scan failed to run' "$A/.git/agent-sync-failed" \
   && pass "held when the scan can't run" || fail "scan failure not recorded"
 on "$A" push-now
-remote_has memory/leak.md && [ ! -e "$A/.git/claude-sync-failed" ] \
+remote_has memory/leak.md && [ ! -e "$A/.git/agent-sync-failed" ] \
   && pass "pushed and error cleared after a clean scan" || fail "did not recover"
 
 echo "== conflict: rebase aborted, commits kept local, session not blocked"
@@ -132,7 +132,7 @@ for _ in $(seq 20); do remote_has memory/bg.md && break; sleep 0.5; done
 remote_has memory/bg.md && pass "background push landed" || fail "background push never landed"
 
 echo "== never fails a session"
-"$script" bogus >/dev/null && CLAUDE_MEMORY_DIR="$HOME/none" "$script" push-now \
+"$script" bogus >/dev/null && AGENT_MEMORY_DIR="$HOME/none" "$script" push-now \
   && pass "exits 0 on bad input and with no clone" || fail "nonzero exit"
 
 echo

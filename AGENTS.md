@@ -71,14 +71,15 @@ Settled; reviewers shouldn't re-raise these.
   and agent-driven, the control machine is a single-operator trusted box, and a
   listing/expiry mechanism isn't worth the complexity for that threat model. Clean up
   manually (see `remote-session.sh`'s header comment).
-- Claude's memory lives in a private repo (`venkatamutyala/claude-memory`, cloned to
-  `~/.claude-memory`), synced straight to its `main` by `hooks/claude-memory-sync.sh`.
+- Agent memory lives in a private, agent-agnostic repo (`venkatamutyala/agent-memory`, cloned to
+  `~/.agent-memory`), synced straight to its `main` by `hooks/agent-memory-sync.sh`.
   Real customer and repo names are allowed there; secrets are not, so the hook runs
   gitleaks itself before every push and holds the push if the scan finds something or
   can't run (no Docker = no push). It is wired in `settings.json`, not
   `guardrails.json`, so it also runs under `--yolo`. It never blocks a session;
   failures surface as a warning at the next session start. All repos share one
-  `MEMORY.md`; per-repo notes go in `projects/<owner>/<repo>.md`.
+  `MEMORY.md` (the filename Claude Code requires); per-repo notes go in
+  `projects/<owner>/<repo>.md`. The repo's own `AGENTS.md` holds its layout and rules.
 - Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
   second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
   (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network

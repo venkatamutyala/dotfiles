@@ -21,7 +21,7 @@
   host/runner (needs bash + openssh-client). Neither `remote-access.sh` (which runs
   on a third-party remote box, not this repo's own test infra) nor
   `remote-session.sh` are wired into `tests/integration-test.sh`.
-- **`tests/memory-sync-test.sh`** — exercises `claude/hooks/claude-memory-sync.sh`
+- **`tests/memory-sync-test.sh`** — exercises `claude/hooks/agent-memory-sync.sh`
   against a local bare remote with two clones standing in for two machines, a stubbed
   `docker` (no real gitleaks run), and a hermetic `$HOME`: clone-if-missing, push and
   pull, `MEMORY.md` union merge, per-repo notes, a push held by a gitleaks finding or a
