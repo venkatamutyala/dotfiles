@@ -22,12 +22,14 @@ git config --global user.name test
 git config --global user.email test@example.com
 git config --global init.defaultBranch main
 
-# Stub docker: saves what the scanner is fed, sleeps $FAKE_GITLEAKS_SLEEP, exits with
-# $FAKE_GITLEAKS_EXIT (default 0 = clean), and records its argv.
+# Stub docker: `info` exits with $FAKE_DOCKER_INFO_EXIT; otherwise it saves what the
+# scanner is fed, sleeps $FAKE_GITLEAKS_SLEEP, exits with $FAKE_GITLEAKS_EXIT (default
+# 0 = clean), and records its argv.
 # Stub gh: `repo clone <repo> <dir> ...` clones $GH_STUB_REMOTE.
 mkdir -p "$HOME/bin"
 cat >"$HOME/bin/docker" <<'STUB'
 #!/bin/sh
+[ "$1" = info ] && exit "${FAKE_DOCKER_INFO_EXIT:-0}"
 cat >"$HOME/scan.in"
 echo "$*" >>"$HOME/docker.calls"
 sleep "${FAKE_GITLEAKS_SLEEP:-0}"
@@ -61,6 +63,8 @@ marker() { cat "$1/.git/agent-sync-failed" 2>/dev/null || true; }
 echo "== start: clones through gh when the repo is missing, or says why it can't"
 start "$A" >/dev/null
 [ -f "$A/memory/MEMORY.md" ] && pass "cloned" || fail "no clone at $A"
+[ -n "$(git -C "$A" config credential.https://github.com.helper)" ] \
+  && pass "clone sets gh as the credential helper" || fail "no credential helper"
 mkdir -p "$B/memory"
 start "$B" >/dev/null
 [ -d "$B/.git" ] && pass "the empty dir Claude pre-creates is replaced by a clone" || fail "empty dir not replaced"
@@ -123,6 +127,9 @@ echo "later note" >"$A/memory/later.md"
 FAKE_GITLEAKS_EXIT=125 on "$A" sync
 [ "$(git -C "$remote" rev-parse main)" = "$before" ] && grep -q 'scan could not run' <<<"$(marker "$A")" \
   && pass "held when the scan can't run" || fail "scan failure not recorded"
+FAKE_DOCKER_INFO_EXIT=1 FAKE_GITLEAKS_EXIT=1 on "$A" sync
+grep -q 'scan could not run' <<<"$(marker "$A")" \
+  && pass "a stopped Docker daemon is not reported as a finding" || fail "marker: $(marker "$A")"
 grep -q '^+token$' "$HOME/scan.in" && grep -q 'later note' "$HOME/scan.in" \
   && pass "every unpushed commit is rescanned, not just the newest" || fail "held commit dropped out of the scan"
 out="$(start "$A")"

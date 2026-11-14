@@ -47,6 +47,8 @@ sync_repo() {
     held "pull failed: $why"
   fi
   if unpushed; then
+    # The docker CLI exits 1 with no daemon, which would read as a gitleaks finding.
+    docker info >/dev/null 2>&1 </dev/null || held "push held: the secret scan could not run (it needs Docker)"
     # Same scan as gitleaks-guard.sh; that hook only sees Claude's own Bash commands.
     g log -p --no-color '@{u}..HEAD' | grep -a '^+' |
       timeout 60 docker run --rm -i --network none "$GITLEAKS_IMAGE" stdin \
