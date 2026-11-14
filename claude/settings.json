@@ -24,22 +24,12 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/agent-memory-sync.sh start",
-            "timeout": 60
+            "timeout": 120
           }
         ]
       }
     ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/agent-memory-sync.sh push"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
       {
         "hooks": [
           {

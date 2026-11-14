@@ -55,20 +55,19 @@ for t in "${!scan[@]}"; do
   command -v docker >/dev/null 2>&1 || { echo "Blocked: the secret scan needs docker." >&2; exit 2; }
 
   # Added lines only, keeping "+++ <file>" headers so findings can be traced to a file.
-  # --text and grep -a so .gitattributes or a stray binary byte can't hide content.
   stream=$(mktemp); err=$(mktemp); chmod 600 "$stream" "$err"
   ( cd "$t" || exit
     if [[ "$kinds" == *staged* ]]; then
-      git diff --no-color --text --no-ext-diff --no-textconv --cached
+      git diff --no-color --cached
       if [[ "$kinds" == *all* || "$kinds" == *add* ]]; then
-        git diff --no-color --text --no-ext-diff --no-textconv
+        git diff --no-color
         git ls-files --others --exclude-standard -z | xargs -0 -r -n1 sh -c 'echo "+++ b/$1"; sed "s/^/+/" -- "$1"' _
       fi
     fi
     if [[ "$kinds" == *push* && -n "$(git remote)" ]]; then
-      git log -p --no-color --text --no-ext-diff --no-textconv --branches --not --remotes
+      git log -p --no-color --branches --not --remotes
     fi
-  ) | LC_ALL=C grep -a '^+' > "$stream"
+  ) | grep -a '^+' > "$stream"
 
   report=$(docker run --rm -i --network none "$GITLEAKS_IMAGE" stdin --redact --no-banner \
              --log-level error --report-format json --report-path - < "$stream" 2>"$err")
@@ -76,7 +75,7 @@ for t in "${!scan[@]}"; do
   case $rc in
     0) ;;
     1) where=$(jq -r '.[] | "\(.StartLine) \(.RuleID)"' <<<"$report" | while read -r line rule; do
-               printf '%s (%s)\n' "$(head -n "$line" "$stream" | grep '^+++ ' | tail -1 | sed 's#^+++ [ab]/##')" "$rule"
+               printf '%s (%s)\n' "$(head -n "$line" "$stream" | grep -a '^+++ ' | tail -1 | sed 's#^+++ [ab]/##')" "$rule"
              done | sort -u)
        printf 'Blocked: gitleaks found secrets in what this would commit/push from %s:\n%s\nDo not open or print these files; tell the user so they can remove the secret.\n' "$t" "$where" >&2
        rm -f "$stream" "$err"; exit 2 ;;

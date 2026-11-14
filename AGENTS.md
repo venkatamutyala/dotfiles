@@ -71,19 +71,20 @@ Settled; reviewers shouldn't re-raise these.
   and agent-driven, the control machine is a single-operator trusted box, and a
   listing/expiry mechanism isn't worth the complexity for that threat model. Clean up
   manually (see `remote-session.sh`'s header comment).
-- Agent memory lives in a private, agent-agnostic repo (`venkatamutyala/agent-memory`)
-  and syncs straight to its `main` after every turn. Real customer and repo names are
-  allowed there; secrets are not, so `hooks/agent-memory-sync.sh` runs gitleaks itself
-  before every push and holds the push if the scan finds something or can't run (no
-  Docker = no push). It is wired in `settings.json`, so it also runs under `--yolo`,
-  and it never blocks a session. Claude may edit only `memory/` and `projects/` there
-  without a prompt. Markdown conflicts keep both sides (`*.md merge=union`) rather
-  than stopping the sync.
-- Accepted memory-sync edge cases: notes are looked up by `owner/repo` only, so a repo
-  on another host with the same path gets the same notes, and GitLab subgroups / Azure
-  DevOps paths can collide; two first-ever sessions racing on a new machine can print
-  a wrong "gh auth login" hint once; a file written during a pull can pick up merge
-  markers if the same non-markdown file changed upstream.
+- Agent memory lives in a private repo (`venkatamutyala/agent-memory`) and syncs
+  straight to its `main` after every turn. Real customer and repo names are allowed
+  there; secrets are not, so `hooks/agent-memory-sync.sh` runs gitleaks before every
+  push and holds the push if the scan finds something or can't run (no Docker = no
+  push). It is wired in `settings.json`, so it also runs under `--yolo`, and it never
+  blocks a session. It is kept deliberately small: the only writer is my own Claude,
+  so it does not defend against hostile content in the memory repo.
+- Accepted memory-sync edge cases: same-line edits of one markdown file on two
+  machines keep both versions (`*.md merge=union`) and can bring back a deleted line;
+  a file deleted on one machine and edited on another, or any non-markdown conflict,
+  pauses that machine's sync until resolved by hand; a machine with no git
+  `user.name`/`user.email` doesn't sync until one is set; memory written before the
+  first successful clone must be moved aside by hand once; notes are looked up by
+  `owner/repo` only (case-sensitive, any host).
 - Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
   second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
   (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network
@@ -95,7 +96,7 @@ Settled; reviewers shouldn't re-raise these.
 tests/run-in-docker.sh bookworm   # tmux 3.3a
 tests/run-in-docker.sh trixie     # tmux 3.5a
 tests/hooks-test.sh               # Claude secret-scan hook (needs docker + jq)
-tests/memory-sync-test.sh         # Claude memory sync hook (needs git + jq)
+tests/memory-sync-test.sh         # Claude memory sync hook (needs git)
 ```
 
 Each must end with `ALL CHECKS PASSED` (`ALL HOOK CHECKS PASSED` for the hook test). Pushing also runs CI.

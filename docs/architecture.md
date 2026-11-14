@@ -124,26 +124,16 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   block message. It blocks on findings, if the scan can't run, or if it can't tell which
   repo the command targets. Needs `jq`.
 - `hooks/agent-memory-sync.sh` keeps `~/.agent-memory` (a clone of the private
-  `venkatamutyala/agent-memory` repo; override with `AGENT_MEMORY_REPO`) in step with
-  its remote. `settings.json` points `autoMemoryDirectory` at its `memory/` folder,
-  allows reads under `~/.agent-memory/` and edits under its `memory/` and `projects/`
-  only, and wires three hooks. `SessionStart` runs `start`: clone via `gh` if missing,
-  sync, then print what other sessions changed and `projects/<owner>/<repo>.md` for the
-  current repo (its stdout goes into Claude's context, which Claude Code caps at 10,000
-  characters, so notes are cut at 6,000 bytes with a pointer to the file; a symlinked
-  notes path is refused). `Stop`/`SessionEnd` run `push`, which starts the same sync in
-  its own session (`setsid`) and returns at once. A sync is: commit, `pull --rebase
-  --autostash`, then, if anything is unpushed, a gitleaks scan of the unpushed commits
-  (same pinned image as `gitleaks-guard.sh`; `--text` and `grep -a` so attributes or
-  binary bytes can't hide content) and a push. Network steps are time-boxed so `start`
-  finishes inside its 60s hook timeout. Every path exits 0. A failed step, a held push,
-  a conflict (rebase aborted; commits stay local), or a rebase someone is running by
-  hand (left alone) is written to `.git/agent-sync-failed` and printed as a
-  `[agent-memory] WARNING` with recovery steps by the next `start`; a fully successful
-  sync clears it. `agent-memory-sync.sh status` shows the same by hand. An `flock` lock
-  stops two syncs overlapping and is dropped by the kernel if a sync is killed. The
-  memory repo's `.gitattributes` sets `*.md merge=union` so lines added on two machines
-  both survive.
+  `venkatamutyala/agent-memory` repo) in step with its remote. `settings.json` points
+  `autoMemoryDirectory` at its `memory/` folder and allows edits under `memory/` and
+  `projects/`. `SessionStart` runs `start`: clone via `gh` if missing, sync, then print
+  `projects/<owner>/<repo>.md` for the current repo (first 6,000 bytes; Claude Code
+  caps hook output at 10,000 characters). `Stop` runs `push`: the same sync, detached.
+  A sync runs under `flock`: commit, `pull --rebase`, then a gitleaks scan (same pinned
+  image as `gitleaks-guard.sh`) and a push if anything is unpushed. It always exits 0;
+  a failure is written to `.git/agent-sync-failed` and printed as a
+  `[agent-memory] WARNING` by the next `start`. The memory repo sets `*.md merge=union`
+  so lines added on two machines both survive.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.
