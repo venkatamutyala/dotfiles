@@ -67,7 +67,7 @@ for t in "${!scan[@]}"; do
     if [[ "$kinds" == *push* && -n "$(git remote)" ]]; then
       git log -p --no-color --branches --not --remotes
     fi
-  ) | grep '^+' > "$stream"
+  ) | grep -a '^+' > "$stream"
 
   report=$(docker run --rm -i --network none "$GITLEAKS_IMAGE" stdin --redact --no-banner \
              --log-level error --report-format json --report-path - < "$stream" 2>"$err")
@@ -75,7 +75,7 @@ for t in "${!scan[@]}"; do
   case $rc in
     0) ;;
     1) where=$(jq -r '.[] | "\(.StartLine) \(.RuleID)"' <<<"$report" | while read -r line rule; do
-               printf '%s (%s)\n' "$(head -n "$line" "$stream" | grep '^+++ ' | tail -1 | sed 's#^+++ [ab]/##')" "$rule"
+               printf '%s (%s)\n' "$(head -n "$line" "$stream" | grep -a '^+++ ' | tail -1 | sed 's#^+++ [ab]/##')" "$rule"
              done | sort -u)
        printf 'Blocked: gitleaks found secrets in what this would commit/push from %s:\n%s\nDo not open or print these files; tell the user so they can remove the secret.\n' "$t" "$where" >&2
        rm -f "$stream" "$err"; exit 2 ;;

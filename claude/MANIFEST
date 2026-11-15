@@ -31,6 +31,7 @@ agents/ux-researcher.md
 agents/verifier.md
 agents/yaml-expert.md
 guardrails.json
+hooks/agent-memory-sync.sh
 hooks/gitleaks-guard.sh
 settings.json
 skills/design/SKILL.md

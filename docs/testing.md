@@ -21,6 +21,12 @@
   host/runner (needs bash + openssh-client). Neither `remote-access.sh` (which runs
   on a third-party remote box, not this repo's own test infra) nor
   `remote-session.sh` are wired into `tests/integration-test.sh`.
+- **`tests/memory-sync-test.sh`** — exercises `claude/hooks/agent-memory-sync.sh`
+  against a local bare remote with two clones standing in for two machines, stubbed
+  `gh` and `docker`, and a hermetic `$HOME`: clone, push and pull, markdown union
+  merges, a conflict, a push held by a finding or a failed scan, a recorded failure,
+  per-repo notes, the detached push, and that it always exits 0. Runs on the
+  host/runner (needs bash + git + util-linux).
 - **shellcheck** — CI runs `koalaman/shellcheck:v0.11.0 --severity=warning` on every
   tracked `*.sh` (zsh files aren't supported by shellcheck).
 - **`.github/workflows/ci.yml`** — runs the test on every `push` and `pull_request`,
@@ -56,7 +62,8 @@ test validates the code in the current commit/branch.
   uses `model: inherit`, carries the credentials safety rule, and is routed by `/review` or `/design`; every agent those skills name exists
   (which pass the same rule to their agents); `claude --yolo`
   maps to `--allow-dangerously-skip-permissions` and skips `guardrails.json`, while
-  plain `claude` loads it; the claude install is version-pinned.
+  plain `claude` loads it; the memory sync hook is executable and wired in
+  `settings.json`; the claude install is version-pinned.
 - **Idempotency:** a second run leaves `~/.zshrc` byte-identical with one `plugins=(`
   line.
 - **Backups:** a `~/.dotfiles-backup-*` directory is created.

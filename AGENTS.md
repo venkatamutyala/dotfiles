@@ -22,9 +22,9 @@ unsupported** — do not add macOS/Homebrew/pbcopy/iTerm references back.
 | `vm-manage.sh` → `~/.oh-my-zsh/custom/` | KVM/libvirt VM management over SSH (called via the `vm` wrapper). |
 | `remote-access.sh` | Standalone, not installed by `index.html`. Served at setup.venkatamutyala.com/remote-access.sh; run via `curl … \| sh` **on a third-party remote box** (NAT'd/outbound-only, nothing pre-installed) to open an ephemeral, key-only SSH session over [tailcat](https://github.com/tailscale/tailcat) — no `sshd`, no package manager, no root required. |
 | `remote-session.sh` | Standalone, not installed by `index.html`. Control-side companion to `remote-access.sh`, run directly (`./remote-session.sh`) on the machine Claude Code operates from: `new` generates the session key material and the one-liner for the remote box; `connect` connects to it. Primary consumer is an agent, not a human typing commands. |
-| `claude/` → `~/.claude/` | Claude Code config tree: `settings.json`, global `CLAUDE.md`, `guardrails.json` (deny/ask rules + hooks, loaded only outside `--yolo`), `hooks/`, `agents/`, `skills/`, `statusline.sh`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
+| `claude/` → `~/.claude/` | Claude Code config tree: `settings.json`, global `CLAUDE.md`, `guardrails.json` (deny/ask rules + hooks, loaded only outside `--yolo`), `hooks/` (secret scan, memory sync), `agents/`, `skills/`, `statusline.sh`. Every file must be listed in `claude/MANIFEST` (CI enforces). |
 | `tests/` | Docker integration test + local runner. |
-| `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the secret-scan hook test. |
+| `.github/workflows/ci.yml` | CI: integration test on debian bookworm + trixie, shellcheck, and the hook and script tests. |
 | `.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json` | release-please: on push to `main`, opens a release PR from Conventional Commits; merging it creates the `vX.Y.Z` tag the installer offers. |
 | `docs/` (`architecture.md`, `testing.md`) | Detailed agent docs, imported by `AGENTS.md`. |
 | `CLAUDE.md`, `CNAME`, `LICENSE`, `README.md` | Claude entry (imports `AGENTS.md`), Pages domain, license, human docs. |
@@ -71,6 +71,20 @@ Settled; reviewers shouldn't re-raise these.
   and agent-driven, the control machine is a single-operator trusted box, and a
   listing/expiry mechanism isn't worth the complexity for that threat model. Clean up
   manually (see `remote-session.sh`'s header comment).
+- Agent memory lives in a private repo (`venkatamutyala/agent-memory`) and syncs
+  straight to its `main` after every turn. Real customer and repo names are allowed
+  there; secrets are not, so `hooks/agent-memory-sync.sh` runs gitleaks before every
+  push and holds the push if the scan finds something or can't run (no Docker = no
+  push). It is wired in `settings.json`, so it also runs under `--yolo`, and it never
+  blocks a session. It is kept deliberately small: the only writer is my own Claude,
+  so it does not defend against hostile content in the memory repo.
+- Accepted memory-sync edge cases: same-line edits of one markdown file on two
+  machines keep both versions (`*.md merge=union`) and can bring back a deleted line;
+  a file deleted on one machine and edited on another, or any non-markdown conflict,
+  pauses that machine's sync until resolved by hand; a machine with no git
+  `user.name`/`user.email` doesn't sync until one is set; memory written before the
+  first successful clone must be moved aside by hand once; notes are looked up by
+  `owner/repo` only (case-sensitive, any host).
 - Accepted edge cases: repo `.gitleaksignore` isn't honored (stdin mode); a user-passed
   second `--settings` replaces the guardrails; `gh auth status -t`; kubectl comma lists
   (`get secret,configmap`); a namespace named exactly `secret(s)` is denied; a network
@@ -82,6 +96,7 @@ Settled; reviewers shouldn't re-raise these.
 tests/run-in-docker.sh bookworm   # tmux 3.3a
 tests/run-in-docker.sh trixie     # tmux 3.5a
 tests/hooks-test.sh               # Claude secret-scan hook (needs docker + jq)
+tests/memory-sync-test.sh         # Claude memory sync hook (needs git)
 ```
 
 Each must end with `ALL CHECKS PASSED` (`ALL HOOK CHECKS PASSED` for the hook test). Pushing also runs CI.

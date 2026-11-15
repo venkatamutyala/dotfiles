@@ -114,6 +114,10 @@ your local OS keyboard settings.
   `~/.claude/settings.json` / `~/.claude/CLAUDE.md` (backing the old one up to `~/.dotfiles-backup-<timestamp>/`
   first), so anything you've added there — permissions, MCP servers, hooks — moves to
   the backup. Re-merge what you need.
+- **Memory:** Claude's auto memory and per-repo notes live in a private repo
+  (`venkatamutyala/agent-memory`) cloned to `~/.agent-memory`. Hooks sync it at session
+  start and after each turn (commit, pull, gitleaks scan, push), so every machine
+  shares one memory. Needs `gh` (signed in) and Docker for the scan.
 - **`claude` wrapper** (in `venkatamutyala-functions.zsh`):
   - If Claude Code isn't installed, the first `claude` run installs a **pinned
     version** via `curl -fsSL https://claude.ai/install.sh | bash -s -- "${CLAUDE_VERSION:-2.1.310}"`

@@ -8,5 +8,36 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
+  },
+  "autoMemoryDirectory": "~/.agent-memory/memory",
+  "permissions": {
+    "allow": [
+      "Read(~/.agent-memory/**)",
+      "Edit(~/.agent-memory/memory/**)",
+      "Edit(~/.agent-memory/projects/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/agent-memory-sync.sh start",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/agent-memory-sync.sh push"
+          }
+        ]
+      }
+    ]
   }
 }

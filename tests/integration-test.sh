@@ -172,6 +172,13 @@ grep -q 'Read(~/.ssh/\*\*)' "$HOME/.claude/guardrails.json" \
   && jq -e '.hooks.PreToolUse[].hooks[] | select(.command | endswith("gitleaks-guard.sh")) | .onFailure == "block"' \
        "$HOME/.claude/guardrails.json" >/dev/null \
   && pass "secret-scan hook installed, executable, and wired (onFailure: block)" || fail "secret-scan hook missing or not wired"
+[ -x "$HOME/.claude/hooks/agent-memory-sync.sh" ] \
+  && jq -e '(.autoMemoryDirectory == "~/.agent-memory/memory")
+            and ([.hooks.SessionStart[].hooks[]] | length > 0 and all(.command == "~/.claude/hooks/agent-memory-sync.sh start"))
+            and ([.hooks.Stop[].hooks[]] | length > 0 and all(.command == "~/.claude/hooks/agent-memory-sync.sh push"))
+            and (.permissions.allow | index("Edit(~/.agent-memory/memory/**)") and index("Edit(~/.agent-memory/projects/**)"))' \
+       "$HOME/.claude/settings.json" >/dev/null \
+  && pass "memory sync hook installed, executable, and wired" || fail "memory sync hook missing or not wired"
 grep -q 'install.sh | bash -s -- ' "$HOME/.oh-my-zsh/custom/venkatamutyala-functions.zsh" \
   && pass "claude install pins a version (bash -s -- VERSION)" || fail "claude install is not version-pinned"
 

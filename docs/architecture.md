@@ -123,6 +123,17 @@ tmux **≥ 3.2** gives the cleanest behavior (bookworm = 3.3a, trixie = 3.5a).
   (digest-pinned, `--network none`, `stdin` mode, redacted), and names the file in its
   block message. It blocks on findings, if the scan can't run, or if it can't tell which
   repo the command targets. Needs `jq`.
+- `hooks/agent-memory-sync.sh` keeps `~/.agent-memory` (a clone of the private
+  `venkatamutyala/agent-memory` repo) in step with its remote. `settings.json` points
+  `autoMemoryDirectory` at its `memory/` folder and allows edits under `memory/` and
+  `projects/`. `SessionStart` runs `start`: clone via `gh` if missing, sync, then print
+  `projects/<owner>/<repo>.md` for the current repo (first 6,000 bytes; Claude Code
+  caps hook output at 10,000 characters). `Stop` runs `push`: the same sync, detached.
+  A sync runs under `flock`: commit, `pull --rebase`, then a gitleaks scan (same pinned
+  image as `gitleaks-guard.sh`) and a push if anything is unpushed. It always exits 0;
+  a failure is written to `.git/agent-sync-failed` and printed as a
+  `[agent-memory] WARNING` by the next `start`. The memory repo sets `*.md merge=union`
+  so lines added on two machines both survive.
 - **Adding a skill/agent/command/hook:** drop the file(s) under `claude/` (e.g.
   `claude/skills/<name>/SKILL.md`) and list each file in `claude/MANIFEST`; no
   installer change needed. The test fails if the manifest and tree disagree.
