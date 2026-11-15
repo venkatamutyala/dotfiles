@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/venkatamutyala/dotfiles/compare/v0.6.0...v0.7.0) (2026-11-15)
+
+
+### Features
+
+* **claude:** sync agent memory through a private git repo ([#29](https://github.com/venkatamutyala/dotfiles/issues/29)) ([358ca67](https://github.com/venkatamutyala/dotfiles/commit/358ca67df0a1438b009c7cdf42d687a2b1987c5d))
+
 ## [0.6.0](https://github.com/venkatamutyala/dotfiles/compare/v0.5.0...v0.6.0) (2026-10-25)
 
 
